@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vextris</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    #game-canvas {
+      border: 1px solid #2a2a40;
+      border-radius: 4px;
+    }
+    #side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 180px;
+    }
+    .panel-section {
+      background: #141420;
+      border: 1px solid #2a2a40;
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .panel-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8888aa;
+      margin-bottom: 8px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-weight: 600;
+      color: #c0c0ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas" width="320" height="640"></canvas>
+    <div id="side-panel">
+      <div class="panel-section" id="stats">
+        <h3>Stats</h3>
+        <div class="stat-row"><span>Score</span><span class="stat-value" id="stat-score">0</span></div>
+        <div class="stat-row"><span>Level</span><span class="stat-value" id="stat-level">1</span></div>
+        <div class="stat-row"><span>Lines</span><span class="stat-value" id="stat-lines">0</span></div>
+        <div class="stat-row"><span>Fill</span><span class="stat-value" id="stat-fill">0%</span></div>
+      </div>
+      <div class="panel-section" id="spell-bank">
+        <h3>Spell Bank</h3>
+        <div id="spell-slots">No vex stored</div>
+      </div>
+      <div class="panel-section" id="next-pieces">
+        <h3>Next</h3>
+        <canvas id="next-canvas" width="120" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/main.ts"></script>
+</body>
+</html>
