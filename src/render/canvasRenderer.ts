@@ -28,7 +28,8 @@ const CELL_BORDER = '#1a1a2e';
 const GRID_COLOR = '#12122a';
 const BG_COLOR = '#000000';
 const GHOST_ALPHA = 0.25;
-const VEX_MARK_COLOR = '#ffffff';
+const VEX_GLOW_COLOR = '#c084fc'; // neon purple
+const VEX_CORE_COLOR = '#e4c8ff'; // bright core
 const CELL_SIZE_PX = 32;
 
 // ─── Drawing Helpers ────────────────────────────────────────────
@@ -60,21 +61,53 @@ function drawCell(
   ctx.globalAlpha = 1;
 }
 
-function drawVexSymbol(ctx: CanvasRenderingContext2D, cx: number, cy: number): void {
+// ─── Vex Mark Rendering ──────────────────────────────────────────
+
+const VEX_PULSE_PERIOD_TICKS = 45; // one full pulse cycle (~0.75s at 60fps)
+
+/** Shared diamond path helper. */
+function diamondPath(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): void {
+  ctx.moveTo(cx, cy - r);       // top
+  ctx.lineTo(cx + r, cy);       // right
+  ctx.lineTo(cx, cy + r);       // bottom
+  ctx.lineTo(cx - r, cy);       // left
+  ctx.closePath();
+}
+
+/**
+ * Draws a neon diamond vex glyph that pulses with the game tick.
+ * Three layers: outer glow ring, inner glow ring, solid core.
+ * The pulse oscillates on a sine wave so it breathes without being distracting.
+ */
+function drawVexSymbol(ctx: CanvasRenderingContext2D, cx: number, cy: number, gameTick: number): void {
+  // Sinusoidal pulse: cycles 0→1→0 smoothly
+  const pulse = (Math.sin((gameTick / VEX_PULSE_PERIOD_TICKS) * Math.PI * 2) + 1) / 2;
+
   ctx.save();
 
-  // Dark backdrop for contrast against any cell color
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  // Outer glow — pulses in size and opacity
+  const outerR = 5.5 + pulse * 3;
+  ctx.globalAlpha = 0.15 + pulse * 0.3;
+  ctx.fillStyle = VEX_GLOW_COLOR;
   ctx.beginPath();
-  ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+  diamondPath(ctx, cx, cy, outerR);
   ctx.fill();
 
-  // Bright glyph on top
-  ctx.fillStyle = VEX_MARK_COLOR;
-  ctx.font = 'bold 14px monospace';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('✦', cx, cy);
+  // Inner glow
+  const innerR = 2.5 + pulse * 2;
+  ctx.globalAlpha = 0.35 + pulse * 0.4;
+  ctx.fillStyle = VEX_GLOW_COLOR;
+  ctx.beginPath();
+  diamondPath(ctx, cx, cy, innerR);
+  ctx.fill();
+
+  // Solid core — steady
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = VEX_CORE_COLOR;
+  ctx.beginPath();
+  diamondPath(ctx, cx, cy, 2);
+  ctx.fill();
+
   ctx.restore();
 }
 
@@ -117,7 +150,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, state: GameState): void
 
       // Vex mark overlay
       if (cell.hasVexMark) {
-        drawVexSymbol(ctx, x + CELL_SIZE_PX / 2, y + CELL_SIZE_PX / 2);
+        drawVexSymbol(ctx, x + CELL_SIZE_PX / 2, y + CELL_SIZE_PX / 2, state.gameTick);
       }
     }
   }
@@ -125,7 +158,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, state: GameState): void
 
 // ─── Active Piece (§20) ─────────────────────────────────────────
 
-export function drawActivePiece(ctx: CanvasRenderingContext2D, piece: ActivePiece): void {
+export function drawActivePiece(ctx: CanvasRenderingContext2D, piece: ActivePiece, gameTick: number): void {
   for (let i = 0; i < piece.blocks.length; i++) {
     const block = piece.blocks[i]!;
     const col = piece.origin.x + block.x;
@@ -140,7 +173,7 @@ export function drawActivePiece(ctx: CanvasRenderingContext2D, piece: ActivePiec
 
     // Vex mark on active piece
     if (piece.vexMarkBlockIndex === i) {
-      drawVexSymbol(ctx, x + CELL_SIZE_PX / 2, y + CELL_SIZE_PX / 2);
+      drawVexSymbol(ctx, x + CELL_SIZE_PX / 2, y + CELL_SIZE_PX / 2, gameTick);
     }
   }
 }
@@ -306,7 +339,7 @@ export function render(
 
   // Draw active piece (on top)
   if (state.activePiece) {
-    drawActivePiece(ctx, state.activePiece);
+    drawActivePiece(ctx, state.activePiece, state.gameTick);
   }
 
   // Next preview
