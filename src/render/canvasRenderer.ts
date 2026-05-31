@@ -85,6 +85,15 @@ function drawVexSymbol(ctx: CanvasRenderingContext2D, cx: number, cy: number, ga
 
   ctx.save();
 
+  // Dark backdrop — ensures contrast against any cell color,
+  // especially violet/lavender where the purple glow would disappear.
+  // Drawn as a tight diamond so it blends with the glow shape, not a circle.
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  diamondPath(ctx, cx, cy, 6);
+  ctx.fill();
+
   // Outer glow — pulses in size and opacity
   const outerR = 5.5 + pulse * 3;
   ctx.globalAlpha = 0.15 + pulse * 0.3;
