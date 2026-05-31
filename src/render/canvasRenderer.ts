@@ -62,8 +62,16 @@ function drawCell(
 
 function drawVexSymbol(ctx: CanvasRenderingContext2D, cx: number, cy: number): void {
   ctx.save();
+
+  // Dark backdrop for contrast against any cell color
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Bright glyph on top
   ctx.fillStyle = VEX_MARK_COLOR;
-  ctx.font = 'bold 12px monospace';
+  ctx.font = 'bold 14px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('✦', cx, cy);
