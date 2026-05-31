@@ -403,6 +403,9 @@ export function lockAndResolve(state: GameState): void {
 
     // Combo
     state.comboCount += 1;
+    if (state.comboCount > 1) {
+      playSound('combo');
+    }
   } else {
     // Reset combo on non-clearing lock
     state.comboCount = 0;
@@ -432,8 +435,12 @@ export function lockAndResolve(state: GameState): void {
   }
 
   // Level up
+  const oldLevel = state.level;
   state.linesCleared += linesCleared;
   state.level = getLevel(state.linesCleared);
+  if (state.level > oldLevel) {
+    playSound('level_up');
+  }
 
   // Spawn next piece
   state.activePiece = undefined;
