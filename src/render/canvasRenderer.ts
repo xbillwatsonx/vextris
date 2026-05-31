@@ -26,7 +26,7 @@ const CELL_COLORS: Record<string, string> = {
 
 const CELL_BORDER = '#1a1a2e';
 const GRID_COLOR = '#12122a';
-const BG_COLOR = '#0a0a0f';
+const BG_COLOR = '#000000';
 const GHOST_ALPHA = 0.25;
 const VEX_MARK_COLOR = '#ffffff';
 const CELL_SIZE_PX = 32;
@@ -199,6 +199,18 @@ const VEX_ICONS: Record<string, string> = {
   SHADOW: '◉',
 };
 
+const VEX_LABELS: Record<string, string> = {
+  COLOR: 'Color',
+  SHAPE: 'Shape',
+  SHADOW: 'Shadow',
+};
+
+const VEX_EFFECTS: Record<string, string> = {
+  COLOR: 'Destroys a random color',
+  SHAPE: 'Destroys a random shape',
+  SHADOW: 'Inverts the board',
+};
+
 const VEX_ICON_COLORS: Record<string, string> = {
   COLOR: '#b388ff',
   SHAPE: '#69f0ae',
@@ -224,19 +236,26 @@ export function renderSpellBank(
     const isShadow = spell.type === 'SHADOW';
     const shadowLocked = isShadow && !canCastShadow;
     const icon = VEX_ICONS[spell.type] ?? '?';
+    const label = VEX_LABELS[spell.type] ?? spell.type;
+    const effect = VEX_EFFECTS[spell.type] ?? '';
     const color = VEX_ICON_COLORS[spell.type] ?? '#888';
     const selected = i === selectedIndex;
-    const borderColor = shadowLocked ? '#444' : selected ? color : '#2a2a40';
-    const border = selected ? `2px solid ${borderColor}` : '1px solid #2a2a40';
-    const bg = selected ? 'rgba(124,77,255,0.2)' : 'transparent';
-    const opacity = shadowLocked ? 'opacity:0.35' : '';
-    const lockSymbol = shadowLocked ? ' 🔒' : '';
 
-    html += `<span style="display:inline-block;width:24px;height:24px;text-align:center;
-      line-height:24px;font-size:14px;margin:2px;border:${border};border-radius:3px;
-      background:${bg};color:${color};${opacity}"
-      title="${isShadow && shadowLocked ? 'Shadow Vex: requires 40% board fill' : spell.type}">${icon}${lockSymbol}</span>`;
+    html += `<div class="spell-item${selected ? ' selected' : ''}${shadowLocked ? ' locked' : ''}">
+      <span class="spell-icon" style="color:${color}">${icon}</span>
+      <span class="spell-label">${label}</span>
+      <span class="spell-effect">${effect}</span>
+      ${shadowLocked ? '🔒' : ''}
+    </div>`;
   }
+
+  // legend
+  html += '<div class="spells-legend">';
+  for (const type of ['COLOR', 'SHAPE', 'SHADOW'] as const) {
+    html += `<span><b style="color:${VEX_ICON_COLORS[type]}">${VEX_ICONS[type]}</b> ${VEX_LABELS[type]}</span>`;
+  }
+  html += '</div>';
+
   container.innerHTML = html;
 }
 
