@@ -132,7 +132,7 @@ const sounds: Record<AudioEvent, () => void> = {
   },
 
   soft_drop() {
-    tone(180, 0.06, 'triangle', 120, 0.06);
+    tone(280, 0.09, 'triangle', 160, 0.08);
   },
 
   hard_drop() {
