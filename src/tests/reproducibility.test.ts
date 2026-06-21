@@ -6,13 +6,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createGameState, startGame, spawnPiece } from '../engine/gameLoop';
+import { createGameState, startGame } from '../engine/gameLoop';
 import { SeededRNG } from '../engine/random';
 import {
   maybeAttachVexMark,
   selectVexType,
-  grantRandomVex,
-  findVexAlignments,
   selectRandomPresentColorWeighted,
   selectRandomPresentShape,
   buildWeightedColorMap,
@@ -24,7 +22,6 @@ import {
   HIDDEN_ROWS,
 } from '../engine/board';
 import type { VexSpellBank } from '../engine/vex';
-import { VEX_MAX_BANK_SIZE } from '../config/gameConfig';
 
 // ─── Helpers ────────────────────────────────────────────────────
 

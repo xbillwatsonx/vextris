@@ -17,7 +17,7 @@ import {
   getKicks,
   calculateGhostPosition,
 } from './pieces';
-import type { Block, Origin, RotationState } from './pieces';
+import type { Origin, RotationState } from './pieces';
 import type { GameState, ActivePiece, GhostPiece } from './gameLoop';
 import { LOCK_RESET_LIMIT } from '../config/gameConfig';
 

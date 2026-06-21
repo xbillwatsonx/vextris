@@ -21,20 +21,15 @@ import {
   castSelectedSpell,
   createActivePiece,
 } from '../engine/gameLoop';
-import type { GameState, ActivePiece } from '../engine/gameLoop';
+import type { GameState } from '../engine/gameLoop';
 import {
-  createEmptyBoard,
   setCell,
-  getCell,
-  getVisibleOccupiedCount,
-  getTotalOccupiedCount,
   COLS,
   TOTAL_ROWS,
   HIDDEN_ROWS,
   logicalToArrayRow,
 } from '../engine/board';
 import type { Board, ShapeId, ColorId } from '../engine/board';
-import { SHAPES } from '../engine/pieces';
 
 // ─── Helpers ────────────────────────────────────────────────────
 
@@ -453,7 +448,7 @@ describe('game over', () => {
     // Actually just fill the two hidden rows directly
     for (let r = 0; r < HIDDEN_ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        setCell(s.board, r, c, { occupied: true, colorId: 'gray' as any, shapeId: 'Z' as any });
+        setCell(s.board, r, c, { occupied: true, colorId: 'gray' as any, shapeId: 'Z' });
       }
     }
 

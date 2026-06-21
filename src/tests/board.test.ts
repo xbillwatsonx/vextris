@@ -27,7 +27,7 @@ import {
   VISIBLE_ROWS,
   VISIBLE_CELL_COUNT,
 } from '../engine/board';
-import type { Board, Cell } from '../engine/board';
+import type { Board } from '../engine/board';
 
 // ─── Helpers ─────────────────────────────────────────────────────
 

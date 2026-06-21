@@ -29,7 +29,7 @@ export function fnv1a32(seed: string): number {
  * State is a 32-bit unsigned integer. Returns { next: newState, value: [0, 2^32-1] }.
  */
 export function mulberry32(state: number): { next: number; value: number } {
-  let s = (state + 0x6D2B79F5) | 0;
+  const s = (state + 0x6D2B79F5) | 0;
   let z = s;
   z = Math.imul(z ^ (z >>> 15), z | 1);
   z = (z + Math.imul(z ^ (z >>> 7), z | 61)) | 0;

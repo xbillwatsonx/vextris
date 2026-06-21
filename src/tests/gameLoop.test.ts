@@ -21,15 +21,11 @@ import {
   createActivePiece,
 } from '../engine/gameLoop';
 import {
-  createEmptyBoard,
   setCell,
-  getCell,
   getVisibleOccupiedCount,
   COLS,
-  TOTAL_ROWS,
   HIDDEN_ROWS,
 } from '../engine/board';
-import type { GameState } from '../engine/gameLoop';
 import { LOCK_DELAY_MS, STARTING_LEVEL } from '../config/gameConfig';
 import {
   occupiedCell,

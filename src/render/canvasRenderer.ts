@@ -6,10 +6,9 @@
  */
 
 import type { GameState, ActivePiece, GhostPiece, VexSpell } from '../engine/gameLoop';
-import { getVisibleFillPercent, getVisibleOccupiedCount, COLS, VISIBLE_ROWS, HIDDEN_ROWS, TOTAL_ROWS } from '../engine/board';
+import { getVisibleFillPercent, COLS, VISIBLE_ROWS, HIDDEN_ROWS, TOTAL_ROWS } from '../engine/board';
 import type { ColorId, ShapeId } from '../engine/board';
 import { getBlocks, getColor } from '../engine/pieces';
-import { SHADOW_VEX_MIN_CELLS } from '../config/gameConfig';
 
 // ─── Colors (§8) ────────────────────────────────────────────────
 

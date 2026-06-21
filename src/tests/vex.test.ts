@@ -11,9 +11,7 @@ import {
   createEmptyBoard,
   setCell,
   getCell,
-  cloneBoard,
   getVisibleOccupiedCount,
-  getTotalOccupiedCount,
   COLS,
   TOTAL_ROWS,
   HIDDEN_ROWS,
@@ -45,7 +43,6 @@ import type { VexSpellBank, VexConfig, VexWeights } from '../engine/vex';
 import { DEFAULT_VEX_CONFIG, DEFAULT_VEX_WEIGHTS } from '../engine/vex';
 import {
   VEX_MAX_BANK_SIZE,
-  SHADOW_VEX_MIN_CELLS,
 } from '../config/gameConfig';
 
 // ─── Helpers ────────────────────────────────────────────────────

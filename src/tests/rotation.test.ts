@@ -18,7 +18,6 @@ import {
   setCell,
   COLS,
   TOTAL_ROWS,
-  HIDDEN_ROWS,
   logicalToArrayRow,
 } from '../engine/board';
 import type { Board } from '../engine/board';

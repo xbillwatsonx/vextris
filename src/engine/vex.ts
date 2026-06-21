@@ -9,24 +9,11 @@
  *   vexCasting.ts    — Color, Shape, Shadow vex casting
  */
 
-import type { Board, Cell, ShapeId, ColorId } from './board';
+import type { Board } from './board';
 import {
-  createEmptyBoard,
-  cloneBoard,
-  setCell,
-  getCell,
-  isInsideVisibleBoard,
-  isInsideTotalBoard,
   COLS,
   TOTAL_ROWS,
-  HIDDEN_ROWS,
-  VISIBLE_CELL_COUNT,
-  findCompletedRows,
-  clearRows,
-  collapseColumns,
-  getVisibleOccupiedCount,
 } from './board';
-import { SeededRNG } from './random';
 import {
   VEX_MARK_CHANCE,
   VEX_MARK_MAX_PER_PIECE,
@@ -34,11 +21,7 @@ import {
   VEX_GRANT_COUNT_PER_ALIGNMENT,
   VEX_MAX_BANK_SIZE,
   VEX_MAX_GRANTS_PER_LOCK,
-  SHADOW_VEX_FILL_THRESHOLD,
-  SHADOW_VEX_MIN_CELLS,
 } from '../config/gameConfig';
-import { collides } from './pieces';
-import type { Block, Origin } from './pieces';
 
 // ─── Types ──────────────────────────────────────────────────────
 

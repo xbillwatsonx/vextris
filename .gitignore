@@ -19,8 +19,16 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
-*Zone.Identifier
+*:Zone.Identifier
 
 # Logs
 *.log
 npm-debug.log*
+
+# Conversation/session exports
+docs/*.jsonl
+docs/*conversation*.md
+
+# Local audit/output notes
+*-audit-report-*.md
+*-bug-patch-notes.txt

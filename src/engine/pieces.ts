@@ -7,11 +7,8 @@
  * Spec references: §8, §9, §25, Appendix A
  */
 
-import type { ShapeId, ColorId, Board, Cell } from './board';
+import type { ShapeId, ColorId, Board } from './board';
 import {
-  COLS,
-  TOTAL_ROWS,
-  HIDDEN_ROWS,
   logicalToArrayRow,
   isInsideTotalBoard,
 } from './board';
@@ -153,7 +150,7 @@ export function getAllShapeIds(): ShapeId[] {
  * Returns the 4 block offsets for a given shape and rotation state.
  */
 export function getBlocks(shapeId: ShapeId, rotationState: RotationState): Block[] {
-  return SHAPES[shapeId]![rotationState] as Block[];
+  return SHAPES[shapeId][rotationState] as Block[];
 }
 
 // ─── Rotation Helpers (§8, Appendix A.4) ────────────────────────
@@ -182,8 +179,6 @@ export const SPAWN_ORIGINS: Record<ShapeId, Origin> = {
 };
 
 // ─── Wall Kick Data (Appendix A.3) ───────────────────────────────
-
-type KickTable = Record<string, Record<string, Kick[]>>;
 
 /**
  * JLSZT kicks: 5 offsets per transition (from→to where to = (from+1)%4 clockwise).

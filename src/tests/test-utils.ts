@@ -16,7 +16,6 @@ import {
   COLS,
   logicalToArrayRow,
 } from '../engine/board';
-import type { Origin } from '../engine/pieces';
 
 // ─── Cell Helpers ───────────────────────────────────────────────
 

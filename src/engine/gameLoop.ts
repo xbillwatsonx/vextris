@@ -6,7 +6,7 @@
  * vex mark spawning, alignment detection, and spell casting.
  */
 
-import type { Board, Cell, ShapeId, ColorId } from './board';
+import type { Board, ShapeId } from './board';
 import {
   createEmptyBoard,
   lockPiece as boardLockPiece,
@@ -16,7 +16,6 @@ import {
   COLS,
   TOTAL_ROWS,
   HIDDEN_ROWS,
-  VISIBLE_CELL_COUNT,
 } from './board';
 import {
   getBlocks,
@@ -25,24 +24,20 @@ import {
   collides,
   calculateGhostPosition,
 } from './pieces';
-import type { Block, Origin, RotationState } from './pieces';
+import type { Origin } from './pieces';
 import { SeededRNG, createBag } from './random';
 import {
   LOCK_DELAY_MS,
   LOCK_RESET_LIMIT,
-  LINES_PER_LEVEL,
   STARTING_LEVEL,
   NEXT_QUEUE_SIZE,
   getGravityInterval,
   getLevel,
   getLineClearScore,
   getDropScore,
-  VEX_MARK_CHANCE,
   SCORE_VEX_ALIGNMENT,
   SCORE_VEX_CELL_DESTROYED,
   SCORE_SHADOW_VEX,
-  SHADOW_VEX_MIN_CELLS,
-  CAST_POST_LOCK_DELAY_MS,
 } from '../config/gameConfig';
 import {
   maybeAttachVexMark,
@@ -53,11 +48,7 @@ import {
   resolveColorVexCast,
   resolveShapeVexCast,
   resolveShadowVexCast,
-  countTotalOccupied,
-  grantRandomVex,
-  selectVexType,
 } from './vex';
-import type { VexType } from './vex';
 import {
   playSound,
 } from '../audio/audioManager';
@@ -345,7 +336,7 @@ export function tick(state: GameState, deltaMs: number): void {
   while (state.gravityTimerMs >= gravityInterval) {
     state.gravityTimerMs -= gravityInterval;
 
-    const piece = state.activePiece!;
+    const piece = state.activePiece;
     const below: Origin = { x: piece.origin.x, y: piece.origin.y + 1 };
     if (!collides(piece.blocks, below, state.board)) {
       piece.origin.y++;

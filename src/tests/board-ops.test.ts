@@ -19,7 +19,6 @@ import {
   HIDDEN_ROWS,
 } from '../engine/board';
 import { getBlocks } from '../engine/pieces';
-import type { ColorId, ShapeId } from '../engine/board';
 
 describe('lockPiece', () => {
   it('writes 4 cells as occupied with correct colorId and shapeId', () => {
@@ -121,7 +120,7 @@ describe('clearRows', () => {
   it('clears a single row', () => {
     const board = createEmptyBoard();
     for (let c = 0; c < COLS; c++) {
-      setCell(board, 5, c, { occupied: true, colorId: 'red', shapeId: 'Z' as ShapeId });
+      setCell(board, 5, c, { occupied: true, colorId: 'red', shapeId: 'Z' });
     }
     clearRows(board, [5]);
     // Row should be empty now
@@ -155,7 +154,7 @@ describe('clearRows', () => {
 
   it('removes vex marks from cleared rows', () => {
     const board = createEmptyBoard();
-    setCell(board, 5, 3, { occupied: true, colorId: 'blue', shapeId: 'J' as ShapeId, hasVexMark: true });
+    setCell(board, 5, 3, { occupied: true, colorId: 'blue', shapeId: 'J', hasVexMark: true });
     clearRows(board, [5]);
     expect(getCell(board, 5, 3).occupied).toBe(false);
     expect(getCell(board, 5, 3).hasVexMark).toBeUndefined();
@@ -175,7 +174,7 @@ describe('collapseColumns', () => {
 
   it('occupied cells fall to the bottom', () => {
     const board = createEmptyBoard();
-    setCell(board, 3, 0, { occupied: true, colorId: 'red' as ColorId });
+    setCell(board, 3, 0, { occupied: true, colorId: 'red' });
     collapseColumns(board);
     // Cell should now be at the bottom
     expect(getCell(board, TOTAL_ROWS - 1, 0).occupied).toBe(true);
@@ -185,9 +184,9 @@ describe('collapseColumns', () => {
 
   it('preserves relative top-to-bottom order', () => {
     const board = createEmptyBoard();
-    setCell(board, 4, 0, { occupied: true, colorId: 'cyan' as ColorId });
-    setCell(board, 8, 0, { occupied: true, colorId: 'red' as ColorId });
-    setCell(board, 12, 0, { occupied: true, colorId: 'green' as ColorId });
+    setCell(board, 4, 0, { occupied: true, colorId: 'cyan' });
+    setCell(board, 8, 0, { occupied: true, colorId: 'red' });
+    setCell(board, 12, 0, { occupied: true, colorId: 'green' });
     collapseColumns(board);
     // Should stack from bottom up: cyan lowest, red above, green top
     expect(getCell(board, TOTAL_ROWS - 3, 0).colorId).toBe('cyan');
@@ -208,8 +207,8 @@ describe('collapseColumns', () => {
   it('cells above cleared rows collapse down', () => {
     const board = createEmptyBoard();
     // Set up: row 5 cleared, rows 3 and 7 occupied
-    setCell(board, 3, 0, { occupied: true, colorId: 'blue' as ColorId });
-    setCell(board, 7, 0, { occupied: true, colorId: 'orange' as ColorId });
+    setCell(board, 3, 0, { occupied: true, colorId: 'blue' });
+    setCell(board, 7, 0, { occupied: true, colorId: 'orange' });
     // Clear row 5 (which is empty in this col anyway), then collapse
     collapseColumns(board);
 
@@ -223,7 +222,7 @@ describe('collapseColumns', () => {
     setCell(board, 5, 3, {
       occupied: true,
       colorId: 'violet',
-      shapeId: 'T' as ShapeId,
+      shapeId: 'T',
       hasVexMark: true,
     });
     collapseColumns(board);
