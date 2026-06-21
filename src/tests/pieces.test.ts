@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createEmptyBoard, setCell, HIDDEN_ROWS } from '../engine/board';
-import type { Board, ShapeId } from '../engine/board';
+import type { ShapeId } from '../engine/board';
 import {
   SHAPES,
   COLOR_MAP,

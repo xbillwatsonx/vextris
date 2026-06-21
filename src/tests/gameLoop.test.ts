@@ -189,7 +189,6 @@ describe('softDrop', () => {
 describe('hardDrop', () => {
   it('instantly locks the piece', () => {
     const state = makeCleanState();
-    const initialY = activeY(state);
     hardDrop(state);
     // Piece should be locked (now on board) and a new piece spawned
     expect(getVisibleOccupiedCount(state.board)).toBe(4); // 4 cells locked
@@ -254,7 +253,6 @@ describe('rotation', () => {
       rotateCCW(state);
       expect(state.activePiece!.rotationState).toBe(0);
     } else if (rotateCW(state)) {
-      const afterCW = state.activePiece!.rotationState;
       rotateCCW(state);
       expect(state.activePiece!.rotationState).toBe(0);
     }
@@ -313,7 +311,6 @@ describe('lock delay', () => {
     const state = makeCleanState();
     // Drop to bottom
     while (softDrop(state)) { /* keep going */ }
-    const pieceBefore = state.activePiece;
 
     // Tick past lock delay
     tick(state, LOCK_DELAY_MS);
@@ -377,7 +374,6 @@ describe('line clearing and scoring', () => {
     activePiece.origin = { x: 4, y: 17 };
     state2.activePiece = activePiece;
 
-    const scoreBefore = state2.score;
     lockAndResolve(state2);
     // O at (4,17) → blocks at (4,17), (5,17), (4,18), (5,18)
     // Row 17 (array 19) was already full — cleared

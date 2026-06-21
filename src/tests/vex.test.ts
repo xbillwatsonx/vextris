@@ -35,12 +35,11 @@ import {
   createInverseShadowBoard,
   applyShadowVexBoard,
   resolveColorVexCast,
-  resolveShapeVexCast,
   resolveShadowVexCast,
   resolvePostVexLineClears,
 } from '../engine/vex';
-import type { VexSpellBank, VexConfig, VexWeights } from '../engine/vex';
-import { DEFAULT_VEX_CONFIG, DEFAULT_VEX_WEIGHTS } from '../engine/vex';
+import type { VexSpellBank, VexWeights } from '../engine/vex';
+import { DEFAULT_VEX_CONFIG } from '../engine/vex';
 import {
   VEX_MAX_BANK_SIZE,
 } from '../config/gameConfig';

@@ -515,7 +515,7 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
   state.status = 'CASTING';
 
   const rng = getRNG(state);
-  let destroyed = 0;
+  let destroyed: number;
   let soundEvent: AudioEvent;
 
   switch (spell.type) {

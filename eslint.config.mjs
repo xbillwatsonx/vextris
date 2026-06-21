@@ -17,6 +17,10 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": "off",
       "@typescript-eslint/no-confusing-void-expression": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
+      // Game project, not a library. Non-null assertions document invariants
+      // (e.g. activePiece exists during PLAYING state). Removing them would
+      // require runtime checks everywhere or type restructuring — not worth it.
+      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
 );

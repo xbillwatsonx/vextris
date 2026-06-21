@@ -49,7 +49,6 @@ export type Board = Cell[][];
 export function createEmptyBoard(
   cols: number = COLS,
   totalRows: number = TOTAL_ROWS,
-  _hiddenRows: number = HIDDEN_ROWS,
 ): Board {
   const board: Board = [];
   for (let r = 0; r < totalRows; r++) {

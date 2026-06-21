@@ -137,7 +137,7 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       if (!vKeyReleased) break; // must release V before another cast
       vKeyReleased = false;
-      const result = castSelectedSpell(state);
+      castSelectedSpell(state);
       break;
     }
     case 'KeyC':
@@ -233,8 +233,6 @@ function handleHeldKeys(deltaMs: number): void {
   const leftHeld = keys.has('ArrowLeft');
   const rightHeld = keys.has('ArrowRight');
   const downHeld = keys.has('ArrowDown');
-  const upHeld = keys.has('ArrowUp');
-  const zHeld = keys.has('KeyZ');
 
   // Rotation (one-shot, triggered once on press)
   // Already handled in keydown — DAS not needed for rotation

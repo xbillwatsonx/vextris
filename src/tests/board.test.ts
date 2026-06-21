@@ -95,13 +95,13 @@ describe('createEmptyBoard', () => {
   });
 
   it('accepts custom dimensions', () => {
-    const board = createEmptyBoard(8, 24, 3);
+    const board = createEmptyBoard(8, 24);
     expect(board.length).toBe(24);
     expect(board[0]!.length).toBe(8);
   });
 
   it('custom hiddenRows does not affect board dimensions (only used externally)', () => {
-    const board = createEmptyBoard(10, 22, 5);
+    const board = createEmptyBoard(10, 22);
     expect(board.length).toBe(22);
     expect(board[0]!.length).toBe(10);
   });

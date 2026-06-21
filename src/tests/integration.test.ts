@@ -51,14 +51,6 @@ function fillLogicalRow(board: Board, logicalY: number, colorId: ColorId = 'red'
   }
 }
 
-/** Place an occupied cell at a logical (x, y) position */
-function lockCell(board: Board, x: number, logicalY: number, colorId: ColorId = 'red', shapeId: ShapeId = 'Z'): void {
-  const row = logicalToArrayRow(logicalY);
-  if (row >= 0 && row < TOTAL_ROWS && x >= 0 && x < COLS) {
-    setCell(board, row, x, { occupied: true, colorId, shapeId });
-  }
-}
-
 /** Count occupied cells in the board */
 function countOccupied(board: Board): number {
   let count = 0;
@@ -393,9 +385,6 @@ describe('vex cast integration', () => {
     expect(s.spellBank.length).toBeGreaterThan(0);
     expect(s.selectedSpellIndex).toBeGreaterThanOrEqual(0);
 
-    const spellIndex = s.selectedSpellIndex;
-    const spellType = s.spellBank[spellIndex]!.type;
-
     // Count occupied cells before cast
     const occupiedBefore = countOccupied(s.board);
 
@@ -448,7 +437,7 @@ describe('game over', () => {
     // Actually just fill the two hidden rows directly
     for (let r = 0; r < HIDDEN_ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        setCell(s.board, r, c, { occupied: true, colorId: 'gray' as any, shapeId: 'Z' });
+        setCell(s.board, r, c, { occupied: true, colorId: 'gray' as ColorId, shapeId: 'Z' });
       }
     }
 

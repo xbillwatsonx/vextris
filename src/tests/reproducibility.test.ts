@@ -13,20 +13,18 @@ import {
   selectVexType,
   selectRandomPresentColorWeighted,
   selectRandomPresentShape,
-  buildWeightedColorMap,
-  getPresentShapes,
 } from '../engine/vex';
 import {
   createEmptyBoard,
   setCell,
   HIDDEN_ROWS,
 } from '../engine/board';
-import type { VexSpellBank } from '../engine/vex';
+import type { Cell, ColorId, ShapeId } from '../engine/board';
 
 // ─── Helpers ────────────────────────────────────────────────────
 
-function occupiedCell(color: string, shape: string, vexMark = false) {
-  return { occupied: true, colorId: color, shapeId: shape, hasVexMark: vexMark } as any;
+function occupiedCell(color: ColorId, shape: ShapeId, vexMark = false): Cell {
+  return { occupied: true, colorId: color, shapeId: shape, hasVexMark: vexMark };
 }
 
 // ─── RNG Seed: Same seed = same everything ──────────────────────
