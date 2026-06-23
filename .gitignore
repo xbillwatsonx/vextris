@@ -32,3 +32,9 @@ docs/*conversation*.md
 # Local audit/output notes
 *-audit-report-*.md
 *-bug-patch-notes.txt
+
+# Agent guide (local only, not tracked in git)
+AGENTS.md
+
+# Sixth (VS Code coding agent) working directory
+.sixth/
