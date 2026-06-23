@@ -375,6 +375,26 @@
     .spell-item.locked {
       opacity: 0.35;
     }
+
+    /* ─── Responsive: small screens ─────────────────────────── */
+    @media (max-width: 560px) {
+      body {
+        overflow-y: auto;
+        min-height: auto;
+      }
+      #game-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      #game-canvas {
+        max-width: 100%;
+        height: auto;
+      }
+      #side-panel {
+        min-width: unset;
+        width: 100%;
+        max-width: 320px;
+      }
     }
   </style>
 </head>

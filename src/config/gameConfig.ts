@@ -89,6 +89,32 @@ export function getDropScore(cellsDropped: number, hardDrop: boolean): number {
   return cellsDropped * (hardDrop ? SCORE_HARD_DROP : SCORE_SOFT_DROP);
 }
 
+/**
+ * Scores post-vex line clears using chunked quad scoring.
+ * Applies the existing 1-4 line table repeatedly for 5+ clears.
+ * No combo bonus (spec §18: vex casts do not affect combo).
+ *
+ * Examples:
+ *   1 line  → 100 × level (single)
+ *   3 lines → 500 × level (triple)
+ *   5 lines → 800 + 100 = 900 × level (quad + single)
+ *   7 lines → 800 + 500 = 1300 × level (quad + triple)
+ *   8 lines → 800 + 800 = 1600 × level (quad + quad)
+ *   20 lines → 5 × 800 = 4000 × level (five quads)
+ *
+ * Does NOT affect normal lock-based scoring or getLineClearScore().
+ */
+export function getPostVexLineClearScore(linesCleared: number, level: number): number {
+  let remaining = linesCleared;
+  let score = 0;
+  while (remaining >= 4) {
+    score += SCORE_QUAD;
+    remaining -= 4;
+  }
+  score += LINE_CLEAR_SCORES[remaining] ?? 0;
+  return score * level;
+}
+
 // ─── Input Timing (§6) ─────────────────────────────────────────
 
 export const DAS_MS = 167;

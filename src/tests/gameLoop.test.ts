@@ -19,6 +19,8 @@ import {
   lockAndResolve,
   tick,
   createActivePiece,
+  castSelectedSpell,
+  resolveCastCollision,
 } from '../engine/gameLoop';
 import {
   setCell,
@@ -562,5 +564,252 @@ describe('ghost piece', () => {
     // For most pieces, ghost.y + max-block-y = 19
     const maxBlockY = Math.max(...state.activePiece!.blocks.map(b => b.y));
     expect(ghost.origin.y + maxBlockY).toBe(19);
+  });
+});
+
+// ─── Post-vex line clear scoring (state-level) ───────────────────
+
+describe('post-vex line clear scoring via castSelectedSpell', () => {
+  it('Color Vex: post-collapse line clear awards score, increments linesCleared, combo unchanged', () => {
+    const state = makeCleanState('color-score');
+    state.activePiece = undefined; // remove spawned piece for clean board setup
+
+    // Set up a board where destroying red causes a collapse into a full row.
+    // Row 19: 9 red (cols 1-9) + 1 blue (col 0)
+    // Row 18: 9 blue (cols 1-9) + 1 red (col 0)
+    // Destroying red → collapse → row 19 = 10 blue = full row → 1 line clear
+    for (let c = 1; c < COLS; c++) {
+      setCell(state.board, HIDDEN_ROWS + 19, c, occupiedCell('red', 'Z'));
+      setCell(state.board, HIDDEN_ROWS + 18, c, occupiedCell('blue', 'J'));
+    }
+    setCell(state.board, HIDDEN_ROWS + 19, 0, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 18, 0, occupiedCell('red', 'Z'));
+
+    // Add a COLOR spell
+    state.spellBank = [{ id: 's1', type: 'COLOR', grantedAtLevel: 1, grantedAtTick: 0 }];
+    state.selectedSpellIndex = 0;
+
+    // Put a valid active piece high up so it doesn't interfere
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 0 };
+    state.status = 'PLAYING';
+
+    const scoreBefore = state.score;
+    const comboBefore = state.comboCount;
+
+    const result = castSelectedSpell(state);
+    expect(result.ok).toBe(true);
+    expect(state.linesCleared).toBe(1);
+    // Score should include: destroyed cells (some) + line clear (100 × level)
+    expect(state.score).toBeGreaterThan(scoreBefore);
+    expect(state.comboCount).toBe(comboBefore);
+  });
+
+  it('Shape Vex: post-collapse line clear awards score, increments linesCleared, combo unchanged', () => {
+    const state = makeCleanState('shape-score');
+    state.activePiece = undefined;
+
+    // Same pattern but shape-based: destroying Z causes collapse into full row
+    for (let c = 1; c < COLS; c++) {
+      setCell(state.board, HIDDEN_ROWS + 19, c, occupiedCell('red', 'Z'));
+      setCell(state.board, HIDDEN_ROWS + 18, c, occupiedCell('blue', 'J'));
+    }
+    setCell(state.board, HIDDEN_ROWS + 19, 0, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 18, 0, occupiedCell('red', 'Z'));
+
+    state.spellBank = [{ id: 's1', type: 'SHAPE', grantedAtLevel: 1, grantedAtTick: 0 }];
+    state.selectedSpellIndex = 0;
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 0 };
+    state.status = 'PLAYING';
+
+    const comboBefore = state.comboCount;
+
+    const result = castSelectedSpell(state);
+    expect(result.ok).toBe(true);
+    expect(state.linesCleared).toBe(1);
+    expect(state.comboCount).toBe(comboBefore);
+  });
+
+  it('Level recalculates when linesCleared crosses threshold via post-vex clear', () => {
+    const state = makeCleanState('level-up');
+    state.activePiece = undefined;
+
+    // Set linesCleared to 9 so 1 more line clear triggers level up (10 lines = level 2)
+    state.linesCleared = 9;
+    state.level = 1;
+
+    // Set up board for a 1-line clear via Color Vex
+    for (let c = 1; c < COLS; c++) {
+      setCell(state.board, HIDDEN_ROWS + 19, c, occupiedCell('red', 'Z'));
+      setCell(state.board, HIDDEN_ROWS + 18, c, occupiedCell('blue', 'J'));
+    }
+    setCell(state.board, HIDDEN_ROWS + 19, 0, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 18, 0, occupiedCell('red', 'Z'));
+
+    state.spellBank = [{ id: 's1', type: 'COLOR', grantedAtLevel: 1, grantedAtTick: 0 }];
+    state.selectedSpellIndex = 0;
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 0 };
+    state.status = 'PLAYING';
+
+    castSelectedSpell(state);
+    expect(state.linesCleared).toBe(10);
+    expect(state.level).toBe(2);
+  });
+
+  it('Shadow Vex: post-collapse line clears are scored, linesCleared incremented, combo unchanged', () => {
+    const state = makeCleanState('shadow-score');
+    state.activePiece = undefined;
+
+    // Fill 10 rows completely (100 cells) → meets 40% threshold (80 cells)
+    // Inverse: 10 empty rows become shadow blocks (10 cols each = full rows)
+    // After collapse: 10 full rows → 10 line clears
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < COLS; c++) {
+        setCell(state.board, HIDDEN_ROWS + r, c, occupiedCell('red', 'Z'));
+      }
+    }
+
+    state.spellBank = [{ id: 's1', type: 'SHADOW', grantedAtLevel: 1, grantedAtTick: 0 }];
+    state.selectedSpellIndex = 0;
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 0 };
+    state.status = 'PLAYING';
+
+    const comboBefore = state.comboCount;
+    const scoreBefore = state.score;
+
+    const result = castSelectedSpell(state);
+    expect(result.ok).toBe(true);
+    expect(state.linesCleared).toBe(10);
+    // Shadow Vex flat score (250 × 1) + post-vex line clears (10 lines = 2 quads + 1 double = 1900 × 1)
+    expect(state.score).toBe(scoreBefore + 250 + 1900);
+    expect(state.comboCount).toBe(comboBefore);
+  });
+
+  it('5+ post-vex line clears use chunked quad scoring', () => {
+    const state = makeCleanState('shadow-5plus');
+    state.activePiece = undefined;
+
+    // Fill 12 rows completely (120 cells) → meets threshold
+    // Inverse: 8 empty rows become shadow → 8 full rows after collapse
+    // 8 lines = 2 quads = 1600 × level
+    for (let r = 0; r < 12; r++) {
+      for (let c = 0; c < COLS; c++) {
+        setCell(state.board, HIDDEN_ROWS + r, c, occupiedCell('red', 'Z'));
+      }
+    }
+
+    state.spellBank = [{ id: 's1', type: 'SHADOW', grantedAtLevel: 1, grantedAtTick: 0 }];
+    state.selectedSpellIndex = 0;
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 0 };
+    state.status = 'PLAYING';
+
+    const scoreBefore = state.score;
+
+    const result = castSelectedSpell(state);
+    expect(result.ok).toBe(true);
+    // 8 lines cleared = 2 quads = 1600 × 1
+    // Shadow Vex flat score = 250 × 1
+    expect(state.linesCleared).toBe(8);
+    expect(state.score).toBe(scoreBefore + 250 + 1600);
+  });
+});
+
+// ─── Cast collision recovery (resolveCastCollision) ─────────────
+
+describe('cast collision recovery (resolveCastCollision)', () => {
+  it('no shift needed: piece does not collide after cast', () => {
+    const state = makeCleanState('cc-noshift');
+
+    // Piece is at y=5, nothing under it
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 5 };
+
+    const ok = resolveCastCollision(state);
+    expect(ok).toBe(true);
+    expect(state.status).toBe('PLAYING');
+    expect(state.activePiece.origin.y).toBe(5);
+  });
+
+  it('one-cell shift: piece collides at current y, clears at y-1', () => {
+    const state = makeCleanState('cc-1shift');
+
+    // I-piece rotation 0: blocks at (0,1),(1,1),(2,1),(3,1)
+    // Origin (3, 5): world cells at (3,6),(4,6),(5,6),(6,6) → row 6
+    // Place locked cells at row 6 cols 3-6 (under piece) → collision at y=5
+    // Row 5 (y=4) should be empty → shift 1 clears
+    setCell(state.board, HIDDEN_ROWS + 6, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 6, occupiedCell('blue', 'J'));
+
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 5 };
+
+    const ok = resolveCastCollision(state);
+    expect(ok).toBe(true);
+    expect(state.status).toBe('PLAYING');
+    // Piece should have shifted up by 1: y=5 → y=4
+    expect(state.activePiece.origin.y).toBe(4);
+  });
+
+  it('two-cell shift: piece collides at y and y-1, clears at y-2', () => {
+    const state = makeCleanState('cc-2shift');
+
+    // I-piece rotation 0: blocks at (0,1),(1,1),(2,1),(3,1)
+    // Origin (3, 5): world cells at (3,6),(4,6),(5,6),(6,6) → row 6
+    // Place locked cells at row 6 (under piece) AND row 5 (y-1) cols 3-6
+    // Row 4 (y-2) should be empty → shift 2 clears
+    setCell(state.board, HIDDEN_ROWS + 6, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 6, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 6, occupiedCell('blue', 'J'));
+
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 5 };
+
+    const ok = resolveCastCollision(state);
+    expect(ok).toBe(true);
+    expect(state.status).toBe('PLAYING');
+    // Piece should have shifted up by 2: y=5 → y=3
+    expect(state.activePiece.origin.y).toBe(3);
+  });
+
+  it('still colliding after max shift triggers GAME_OVER', () => {
+    const state = makeCleanState('cc-gameover');
+
+    // I-piece rotation 0: blocks at (0,1),(1,1),(2,1),(3,1)
+    // Origin (3, 5): world cells at (3,6),(4,6),(5,6),(6,6) → row 6
+    // Place locked cells at rows 6, 5, AND 4 cols 3-6
+    // Shift 0: row 6 → collision. Shift 1: row 5 → collision. Shift 2: row 4 → collision.
+    // All 3 shifts fail → GAME_OVER
+    setCell(state.board, HIDDEN_ROWS + 6, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 6, 6, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 5, 6, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 4, 3, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 4, 4, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 4, 5, occupiedCell('blue', 'J'));
+    setCell(state.board, HIDDEN_ROWS + 4, 6, occupiedCell('blue', 'J'));
+
+    state.activePiece = createActivePiece('I');
+    state.activePiece.origin = { x: 3, y: 5 };
+
+    const ok = resolveCastCollision(state);
+    expect(ok).toBe(false);
+    expect(state.status).toBe('GAME_OVER');
+    expect(state.activePiece).toBeUndefined();
+    expect(state.ghostPiece).toBeUndefined();
   });
 });

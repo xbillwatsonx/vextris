@@ -9,6 +9,7 @@ import { createGameState, startGame, moveLeft, moveRight, softDrop, hardDrop, ro
 import { render } from '../src/render/canvasRenderer';
 import { playSound, toggleMute } from '../src/audio/audioManager';
 import { saveScore, loadScores } from '../src/engine/scores';
+import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -57,11 +58,12 @@ function showScoreboard(): void {
   scoreboardShown = true;
 
   // Save score
+  const savedDate = new Date().toISOString();
   saveScore({
     score: state.score,
     level: state.level,
     lines: state.linesCleared,
-    date: new Date().toISOString(),
+    date: savedDate,
   });
 
   // Populate final stats
@@ -83,7 +85,7 @@ function showScoreboard(): void {
     let html = '<table class="score-table"><tr><th>#</th><th>SCORE</th><th>LEVEL</th><th>LINES</th></tr>';
     for (let i = 0; i < scores.length; i++) {
       const s = scores[i]!;
-      const isLatest = s.score === state.score && s.level === state.level && s.lines === state.linesCleared;
+      const isLatest = s.date === savedDate;
       html += `<tr class="${isLatest ? 'highlight' : ''}">
         <td>${i + 1}</td>
         <td>${s.score.toLocaleString()}</td>
@@ -130,8 +132,7 @@ document.addEventListener('keydown', (e) => {
   switch (e.code) {
     case 'Space':
       e.preventDefault();
-      hardDrop(state);
-      playSound('hard_drop');
+      if (hardDrop(state)) playSound('hard_drop');
       break;
     case 'KeyV': {
       e.preventDefault();
@@ -154,13 +155,11 @@ document.addEventListener('keydown', (e) => {
       break;
     case 'ArrowUp':
       e.preventDefault();
-      rotateCW(state);
-      playSound('rotate');
+      if (rotateCW(state)) playSound('rotate');
       break;
     case 'KeyZ':
       e.preventDefault();
-      rotateCCW(state);
-      playSound('rotate');
+      if (rotateCCW(state)) playSound('rotate');
       break;
     case 'Escape':
       if (state.status === 'PLAYING') {
@@ -205,6 +204,8 @@ const ARR_INTERVAL = 33; // ms between auto-repeat moves
 let dasTimer = 0;
 let arrTimer = 0;
 let dasDirection: 'left' | 'right' | null = null;
+let softDropTimer = 0;
+let prevDownHeld = false;
 
 function gameLoop(now: number): void {
   const deltaMs = now - lastFrame;
@@ -237,11 +238,23 @@ function handleHeldKeys(deltaMs: number): void {
   // Rotation (one-shot, triggered once on press)
   // Already handled in keydown — DAS not needed for rotation
 
-  // Soft drop — repeat while held
+  // Soft drop — immediate on first press, then gated by SOFT_DROP_INTERVAL_MS
   if (downHeld) {
-    softDrop(state);
-    playSound('soft_drop');
+    if (!prevDownHeld) {
+      // Initial press: immediate soft drop
+      if (softDrop(state)) playSound('soft_drop');
+    } else {
+      // Repeat gated by interval
+      softDropTimer += deltaMs;
+      while (softDropTimer >= SOFT_DROP_INTERVAL_MS) {
+        softDropTimer -= SOFT_DROP_INTERVAL_MS;
+        if (softDrop(state)) playSound('soft_drop');
+      }
+    }
+  } else {
+    softDropTimer = 0;
   }
+  prevDownHeld = downHeld;
 
   // DAS/ARR for horizontal movement
   const newDirection = leftHeld ? 'left' : rightHeld ? 'right' : null;
@@ -254,11 +267,9 @@ function handleHeldKeys(deltaMs: number): void {
 
     // Initial press: move immediately
     if (newDirection === 'left') {
-      moveLeft(state);
-      playSound('move');
+      if (moveLeft(state)) playSound('move');
     } else if (newDirection === 'right') {
-      moveRight(state);
-      playSound('move');
+      if (moveRight(state)) playSound('move');
     }
   } else if (dasDirection) {
     // Same direction held
@@ -270,11 +281,9 @@ function handleHeldKeys(deltaMs: number): void {
       while (arrTimer >= ARR_INTERVAL) {
         arrTimer -= ARR_INTERVAL;
         if (dasDirection === 'left') {
-          moveLeft(state);
-          playSound('move');
+          if (moveLeft(state)) playSound('move');
         } else {
-          moveRight(state);
-          playSound('move');
+          if (moveRight(state)) playSound('move');
         }
       }
     }

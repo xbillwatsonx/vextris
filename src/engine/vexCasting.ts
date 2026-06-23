@@ -208,12 +208,12 @@ export function resolvePostVexLineClears(board: Board): number {
 
 /**
  * Resolves a Color Vex cast: select target, destroy, collapse, line clear.
- * Returns destruction count or undefined if no target.
+ * Returns destruction count and post-vex line-clear count, or undefined if no target.
  */
 export function resolveColorVexCast(
   board: Board,
   rng: SeededRNG,
-): { destroyed: number; target: ColorId } | undefined {
+): { destroyed: number; target: ColorId; linesCleared: number } | undefined {
   const target = selectRandomPresentColorWeighted(board, rng);
   if (!target) return undefined;
 
@@ -221,18 +221,19 @@ export function resolveColorVexCast(
   collapseColumns(board);
 
   // Resolve post-vex line clears
-  resolvePostVexLineClears(board);
+  const linesCleared = resolvePostVexLineClears(board);
 
-  return { destroyed, target };
+  return { destroyed, target, linesCleared };
 }
 
 /**
  * Resolves a Shape Vex cast: select target, destroy, collapse, line clear.
+ * Returns destruction count and post-vex line-clear count, or undefined if no target.
  */
 export function resolveShapeVexCast(
   board: Board,
   rng: SeededRNG,
-): { destroyed: number; target: ShapeId } | undefined {
+): { destroyed: number; target: ShapeId; linesCleared: number } | undefined {
   const target = selectRandomPresentShape(board, rng);
   if (!target) return undefined;
 
@@ -240,14 +241,17 @@ export function resolveShapeVexCast(
   collapseColumns(board);
 
   // Resolve post-vex line clears
-  resolvePostVexLineClears(board);
+  const linesCleared = resolvePostVexLineClears(board);
 
-  return { destroyed, target };
+  return { destroyed, target, linesCleared };
 }
 
 /**
  * Resolves a Shadow Vex cast directly on the board.
+ * Returns post-vex line-clear count after inverse+collapse.
  */
-export function resolveShadowVexCast(board: Board): void {
+export function resolveShadowVexCast(board: Board): { linesCleared: number } {
   applyShadowVexBoard(board);
+  const linesCleared = resolvePostVexLineClears(board);
+  return { linesCleared };
 }

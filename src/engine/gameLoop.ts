@@ -35,9 +35,11 @@ import {
   getLevel,
   getLineClearScore,
   getDropScore,
+  getPostVexLineClearScore,
   SCORE_VEX_ALIGNMENT,
   SCORE_VEX_CELL_DESTROYED,
   SCORE_SHADOW_VEX,
+  CAST_UPWARD_SHIFT_MAX,
 } from '../config/gameConfig';
 import {
   maybeAttachVexMark,
@@ -72,6 +74,47 @@ export type {
   GameStatus,
   GameState,
 } from './types';
+
+/**
+ * Post-cast collision recovery (§17 step 6).
+ *
+ * After a vex cast modifies the board, the active piece may overlap
+ * locked cells. Shift the piece upward (up to CAST_UPWARD_SHIFT_MAX cells)
+ * until a non-colliding position is found. If still colliding after max
+ * shift, transition to GAME_OVER.
+ *
+ * Returns true if a valid position was found, false if GAME_OVER.
+ * Exported for direct unit testing.
+ */
+export function resolveCastCollision(state: GameState): boolean {
+  if (!state.activePiece) return true;
+
+  let found = false;
+  for (let shift = 0; shift <= CAST_UPWARD_SHIFT_MAX; shift++) {
+    const checkOrigin: Origin = { x: state.activePiece.origin.x, y: state.activePiece.origin.y - shift };
+    if (!collides(state.activePiece.blocks, checkOrigin, state.board)) {
+      state.activePiece.origin.y -= shift;
+      state.ghostPiece = buildGhost(state.activePiece, state.board);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    state.activePiece = undefined;
+    state.ghostPiece = undefined;
+    state.status = 'GAME_OVER';
+    return false;
+  }
+
+  // Reset lock delay if grounded after cast (§17 step 8)
+  const grounded: Origin = { x: state.activePiece.origin.x, y: state.activePiece.origin.y + 1 };
+  if (collides(state.activePiece.blocks, grounded, state.board)) {
+    state.lockDelayTimerMs = 0;
+  }
+
+  return true;
+}
 
 // ─── Factory ────────────────────────────────────────────────────
 
@@ -285,9 +328,10 @@ export function softDrop(state: GameState): boolean {
 
 /**
  * Hard drop: instantly places piece at ghost position, locks, and resolves.
+ * Returns true if the drop happened, false if game wasn't playing or no active piece.
  */
-export function hardDrop(state: GameState): void {
-  if (!state.activePiece || state.status !== 'PLAYING') return;
+export function hardDrop(state: GameState): boolean {
+  if (!state.activePiece || state.status !== 'PLAYING') return false;
 
   const piece = state.activePiece;
   const ghostOrigin = calculateGhostPosition(piece.blocks, piece.origin, state.board);
@@ -301,6 +345,7 @@ export function hardDrop(state: GameState): void {
 
   // Lock immediately (no lock delay)
   lockAndResolve(state);
+  return true;
 }
 
 // ─── Lock Delay (§19) ──────────────────────────────────────────
@@ -516,6 +561,7 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
 
   const rng = getRNG(state);
   let destroyed: number;
+  let postVexLines: number;
   let soundEvent: AudioEvent;
 
   switch (spell.type) {
@@ -527,6 +573,7 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
         return { ok: false, reason: 'no_target' };
       }
       destroyed = result.destroyed;
+      postVexLines = result.linesCleared;
       soundEvent = 'color_vex_cast';
       break;
     }
@@ -538,11 +585,13 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
         return { ok: false, reason: 'no_target' };
       }
       destroyed = result.destroyed;
+      postVexLines = result.linesCleared;
       soundEvent = 'shape_vex_cast';
       break;
     }
     case 'SHADOW': {
-      resolveShadowVexCast(state.board);
+      const result = resolveShadowVexCast(state.board);
+      postVexLines = result.linesCleared;
       destroyed = 0;
       soundEvent = 'shadow_vex_cast';
       state.score += SCORE_SHADOW_VEX * state.level;
@@ -558,6 +607,19 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
     state.score += SCORE_VEX_CELL_DESTROYED * destroyed * state.level;
   }
 
+  // Score post-vex line clears (§18: normal scoring, no combo)
+  if (postVexLines > 0) {
+    state.score += getPostVexLineClearScore(postVexLines, state.level);
+    state.linesCleared += postVexLines;
+    const oldLevel = state.level;
+    state.level = getLevel(state.linesCleared);
+    if (state.level > oldLevel) {
+      playSound('level_up');
+    }
+    playSound('line_clear');
+  }
+  // comboCount is NOT touched (§18: vex casts do not affect combo counter)
+
   playSound(soundEvent);
 
   // Remove spell from bank with post-cast index rules (§12)
@@ -566,19 +628,11 @@ export function castSelectedSpell(state: GameState): { ok: boolean; reason?: str
 
   // Post-cast: check active piece collision, shift up if needed (§17 step 6)
   if (state.activePiece) {
-    for (let shift = 0; shift < 2; shift++) {
-      const checkOrigin = { x: state.activePiece.origin.x, y: state.activePiece.origin.y - shift };
-      if (!collides(state.activePiece.blocks, checkOrigin, state.board)) {
-        state.activePiece.origin.y -= shift;
-        state.ghostPiece = buildGhost(state.activePiece, state.board);
-        break;
-      }
-    }
-
-    // Reset lock delay if grounded after cast (§17 step 8)
-    const grounded: Origin = { x: state.activePiece.origin.x, y: state.activePiece.origin.y + 1 };
-    if (collides(state.activePiece.blocks, grounded, state.board)) {
-      state.lockDelayTimerMs = 0;
+    const recovered = resolveCastCollision(state);
+    if (!recovered) {
+      saveRNG(state, rng);
+      playSound('game_over');
+      return { ok: false, reason: 'game_over' };
     }
   }
 

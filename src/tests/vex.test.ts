@@ -35,6 +35,7 @@ import {
   createInverseShadowBoard,
   applyShadowVexBoard,
   resolveColorVexCast,
+  resolveShapeVexCast,
   resolveShadowVexCast,
   resolvePostVexLineClears,
 } from '../engine/vex';
@@ -778,5 +779,112 @@ describe('resolvePostVexLineClears', () => {
     const board = createEmptyBoard();
     setCell(board, HIDDEN_ROWS + 5, 3, occCell());
     expect(resolvePostVexLineClears(board)).toBe(0);
+  });
+});
+
+// ─── Post-vex line clear return values (board mutation layer) ─────
+
+describe('resolveColorVexCast returns linesCleared', () => {
+  it('returns linesCleared > 0 when destruction causes a full row to collapse', () => {
+    // Row 19: 9 red + 1 blue (col 0)
+    // Row 18: 9 blue (cols 1-9) + 1 red (col 0)
+    // Destroying red removes col 0 from both rows.
+    // Collapse drops 9 blue from row 18 cols 1-9 down to row 19 cols 1-9.
+    // Row 19 now has 1 blue (col 0, original) + 9 blue (cols 1-9, collapsed) = full row.
+    const board = createEmptyBoard();
+    for (let c = 1; c < COLS; c++) {
+      setCell(board, HIDDEN_ROWS + 19, c, occCell('red', 'Z'));
+      setCell(board, HIDDEN_ROWS + 18, c, occCell('blue', 'J'));
+    }
+    setCell(board, HIDDEN_ROWS + 19, 0, occCell('blue', 'J'));
+    setCell(board, HIDDEN_ROWS + 18, 0, occCell('red', 'Z'));
+
+    const rng = new SeededRNG('color-lines');
+    const result = resolveColorVexCast(board, rng);
+    expect(result).toBeDefined();
+    expect(result!.linesCleared).toBe(1);
+  });
+
+  it('returns linesCleared: 0 when no full rows result', () => {
+    const board = createEmptyBoard();
+    setCell(board, HIDDEN_ROWS + 5, 3, occCell('red', 'Z'));
+    setCell(board, HIDDEN_ROWS + 10, 7, occCell('red', 'Z'));
+
+    const rng = new SeededRNG('color-no-lines');
+    const result = resolveColorVexCast(board, rng);
+    expect(result).toBeDefined();
+    expect(result!.linesCleared).toBe(0);
+  });
+});
+
+describe('resolveShapeVexCast returns linesCleared', () => {
+  it('returns linesCleared > 0 when destruction causes full rows', () => {
+    // Row 19: 9 Z-shape (red) + 1 J-shape (blue, col 0)
+    // Row 18: 9 J-shape (blue, cols 1-9) + 1 Z-shape (red, col 0)
+    // Destroying Z removes col 0 from both rows.
+    // Collapse drops 9 J from row 18 cols 1-9 down to row 19 cols 1-9.
+    // Row 19 now has 1 J (col 0) + 9 J (cols 1-9, collapsed) = full row.
+    const board = createEmptyBoard();
+    for (let c = 1; c < COLS; c++) {
+      setCell(board, HIDDEN_ROWS + 19, c, occCell('red', 'Z'));
+      setCell(board, HIDDEN_ROWS + 18, c, occCell('blue', 'J'));
+    }
+    setCell(board, HIDDEN_ROWS + 19, 0, occCell('blue', 'J'));
+    setCell(board, HIDDEN_ROWS + 18, 0, occCell('red', 'Z'));
+
+    const rng = new SeededRNG('shape-lines');
+    const result = resolveShapeVexCast(board, rng);
+    expect(result).toBeDefined();
+    expect(result!.linesCleared).toBe(1);
+  });
+
+  it('returns linesCleared: 0 when no full rows result', () => {
+    const board = createEmptyBoard();
+    setCell(board, HIDDEN_ROWS + 5, 3, occCell('red', 'Z'));
+    setCell(board, HIDDEN_ROWS + 10, 7, occCell('red', 'Z'));
+
+    const rng = new SeededRNG('shape-no-lines');
+    const result = resolveShapeVexCast(board, rng);
+    expect(result).toBeDefined();
+    expect(result!.linesCleared).toBe(0);
+  });
+});
+
+describe('resolveShadowVexCast returns linesCleared', () => {
+  it('returns linesCleared > 0 when inverse+collapse produces full rows', () => {
+    // Fill 12 rows completely, leave 8 rows empty.
+    // Inverse: 12 filled rows become empty, 8 empty rows become shadow blocks.
+    // After collapse, the 8 rows of shadow blocks settle at bottom.
+    // 8 < 10 cols, so they won't be full rows — need a different approach.
+    //
+    // Instead: fill 10 rows completely (100 cells), leave 10 empty.
+    // Inverse: 10 empty rows become shadow (10 cols each = full rows).
+    // After collapse: 10 full rows of shadow at bottom → 10 line clears.
+    const board = createEmptyBoard();
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < COLS; c++) {
+        setCell(board, HIDDEN_ROWS + r, c, occCell('red', 'Z'));
+      }
+    }
+
+    const result = resolveShadowVexCast(board);
+    expect(result.linesCleared).toBe(10);
+  });
+
+  it('returns linesCleared: 0 when no full rows result', () => {
+    // Nearly full board: 199 of 200 visible cells occupied.
+    // Inverse: 1 empty cell becomes 1 shadow block.
+    // After collapse: 1 shadow block at bottom, no full rows.
+    const board = createEmptyBoard();
+    for (let r = 0; r < 20; r++) {
+      for (let c = 0; c < COLS; c++) {
+        setCell(board, HIDDEN_ROWS + r, c, occCell('red', 'Z'));
+      }
+    }
+    // Remove one cell to leave 199 occupied
+    setCell(board, HIDDEN_ROWS + 0, 0, { occupied: false });
+
+    const result = resolveShadowVexCast(board);
+    expect(result.linesCleared).toBe(0);
   });
 });
