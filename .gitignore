@@ -40,3 +40,6 @@ AGENTS.md
 .sixth/
 # Original music source files (mp3s) — converted .ogg files live in public/music/
 /music/
+
+# itch.io build zips
+vextris-*.zip
