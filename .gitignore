@@ -38,3 +38,5 @@ AGENTS.md
 
 # Sixth (VS Code coding agent) working directory
 .sixth/
+# Original music source files (mp3s) — converted .ogg files live in public/music/
+/music/

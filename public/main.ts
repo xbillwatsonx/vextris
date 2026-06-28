@@ -7,9 +7,11 @@
 
 import { createGameState, startGame, moveLeft, moveRight, softDrop, hardDrop, rotateCW, rotateCCW, tick, cycleSpell, castSelectedSpell } from '../src/engine/gameLoop';
 import { render } from '../src/render/canvasRenderer';
-import { playSound, toggleMute } from '../src/audio/audioManager';
+import { playSound, toggleMute, isMuted } from '../src/audio/audioManager';
+import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio/musicManager';
 import { saveScore, loadScores } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
+import { getVisibleFillPercent } from '../src/engine/board';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -46,6 +48,8 @@ function advanceIntro(): void {
     instructionsOverlay.classList.add('hidden');
     startGame(state);
     playSound('resume');
+    // Start background music (user gesture has occurred)
+    startMusic();
   }
 }
 
@@ -172,6 +176,7 @@ document.addEventListener('keydown', (e) => {
       break;
     case 'KeyM':
       toggleMute();
+      setMusicMuted(isMuted());
       break;
   }
 });
@@ -194,6 +199,8 @@ function restartGame(): void {
   Object.assign(state, newState);
   startGame(state);
   playSound('resume');
+  // Reset music for new game
+  resetMusic();
 }
 
 // ─── Game Loop ──────────────────────────────────────────────────
@@ -223,6 +230,9 @@ function gameLoop(now: number): void {
   if (state.status === 'GAME_OVER' && !scoreboardShown) {
     showScoreboard();
   }
+
+  // Update background music (level/fill/phase tracking)
+  updateMusic(state.level, getVisibleFillPercent(state.board), state.status, now);
 
   // Render
   render(gameCtx, nextCtx, nextCanvas, spellContainer, state);
