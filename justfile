@@ -1,13 +1,71 @@
 # vextris — falling-block puzzle with vex spell system
-# Run `just` for a menu of every project command.
+# Standard agent justfile convention — every repo feels the same.
 
 set shell := ["bash", "-uc"]
 # `.env` is auto-loaded by default; set JUST_NO_DOTENV=1 to disable
 
-# ── Menu ───────────────────────────────────────────────────────────
+# ── Navigation ─────────────────────────────────────────────────────
 
-default:
+# Show all commands
+help:
     @just --list
+
+# Open command menu (requires justx)
+menu:
+    @justx
+
+# ── Agent Workflows ─────────────────────────────────────────────────
+
+# Agent preflight checks — run before starting work
+[group('agent')]
+agent-preflight:
+    @echo "── Git Status ──"
+    @git status --short
+    @echo ""
+    @echo "── Available Recipes ──"
+    @just --list
+
+# Agent verification after edits — confirm what changed
+[group('agent')]
+agent-verify:
+    @echo "── Git Status ──"
+    @git status --short
+    @echo ""
+    @echo "── Diff Summary ──"
+    @git diff --stat
+
+# Show current repo state — branch, recent commits, status
+[group('agent')]
+agent-status:
+    @echo "── Branch ──"
+    @git branch --show-current
+    @echo ""
+    @echo "── Recent Commits ──"
+    @git log --oneline -5
+    @echo ""
+    @echo "── Working Tree ──"
+    @git status --short
+
+# Drop a handoff brief next to this justfile
+[group('agent')]
+handoff out="_handoff.md":
+    @echo "# Handoff brief for {{justfile_directory()}}" > {{out}}
+    @echo "" >> {{out}}
+    @echo "## Available commands" >> {{out}}
+    @just --list >> {{out}}
+    @echo "" >> {{out}}
+    @echo "## Last commits" >> {{out}}
+    @git log --oneline -10 >> {{out}}
+    @echo "Wrote {{out}}"
+
+# Show what files a new agent should read first
+[group('agent')]
+agent-context:
+    @echo "1. justfile (this file)"
+    @echo "2. README.md"
+    @echo "3. AGENTS.md (if present)"
+    @echo "4. UPGRADE_ROADMAP.md (if present)"
+    @echo "5. vextris-codebase-audit-report-codex.md (if present)"
 
 # ── Dev lifecycle ──────────────────────────────────────────────────
 
@@ -59,29 +117,6 @@ lint:
 [group('lint')]
 lint-fix:
     @npx eslint src/ --fix
-
-# ── Agent handoff ─────────────────────────────────────────────────
-
-# Drop a handoff brief next to this justfile
-[group('agent')]
-handoff out="_handoff.md":
-    @echo "# Handoff brief for {{justfile_directory()}}" > {{out}}
-    @echo "" >> {{out}}
-    @echo "## Available commands" >> {{out}}
-    @just --list >> {{out}}
-    @echo "" >> {{out}}
-    @echo "## Last commits" >> {{out}}
-    @git log --oneline -10 >> {{out}}
-    @echo "Wrote {{out}}"
-
-# Show what files a new agent should read first
-[group('agent')]
-agent-context:
-    @echo "1. justfile (this file)"
-    @echo "2. README.md"
-    @echo "3. AGENTS.md (if present)"
-    @echo "4. UPGRADE_ROADMAP.md (if present)"
-    @echo "5. vextris-codebase-audit-report-codex.md (if present)"
 
 # ── Maintenance ───────────────────────────────────────────────────
 

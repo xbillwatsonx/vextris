@@ -5,6 +5,7 @@
  */
 
 export interface ScoreEntry {
+  name: string;   // 3-char initials (or '---' for non-high-scores)
   score: number;
   level: number;
   lines: number;
@@ -54,7 +55,8 @@ export function clearScores(): void {
 function isValidEntry(e: unknown): e is ScoreEntry {
   if (!e || typeof e !== 'object') return false;
   const s = e as Record<string, unknown>;
-  return typeof s.score === 'number'
+  return typeof s.name === 'string'
+    && typeof s.score === 'number'
     && typeof s.level === 'number'
     && typeof s.lines === 'number'
     && typeof s.date === 'string';

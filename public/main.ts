@@ -9,7 +9,7 @@ import { createGameState, startGame, moveLeft, moveRight, softDrop, hardDrop, ro
 import { render } from '../src/render/canvasRenderer';
 import { playSound, toggleMute, isMuted } from '../src/audio/audioManager';
 import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio/musicManager';
-import { saveScore, loadScores } from '../src/engine/scores';
+import { saveScore, loadScores, isHighScore } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 import { getVisibleFillPercent } from '../src/engine/board';
 
@@ -21,6 +21,7 @@ const spellContainer = document.getElementById('spell-slots')!;
 const introOverlay = document.getElementById('intro-overlay')!;
 const instructionsOverlay = document.getElementById('instructions-overlay')!;
 const scoreboardOverlay = document.getElementById('scoreboard-overlay')!;
+const nameEntryOverlay = document.getElementById('name-entry-overlay')!;
 
 const gameCtx = gameCanvas.getContext('2d')!;
 const nextCtx = nextCanvas.getContext('2d')!;
@@ -56,19 +57,13 @@ function advanceIntro(): void {
 // ─── Scoreboard ─────────────────────────────────────────────────
 
 let scoreboardShown = false;
+let savedDate = '';
 
 function showScoreboard(): void {
   if (scoreboardShown) return;
   scoreboardShown = true;
 
-  // Save score
-  const savedDate = new Date().toISOString();
-  saveScore({
-    score: state.score,
-    level: state.level,
-    lines: state.linesCleared,
-    date: savedDate,
-  });
+  savedDate = new Date().toISOString();
 
   // Populate final stats
   const finalScore = document.getElementById('final-score');
@@ -78,7 +73,23 @@ function showScoreboard(): void {
   if (finalLevel) finalLevel.textContent = String(state.level);
   if (finalLines) finalLines.textContent = String(state.linesCleared);
 
-  // Populate high scores
+  // Check if this is a high score — if so, show name entry first
+  if (isHighScore(state.score)) {
+    startNameEntry();
+  } else {
+    // Not a high score — save with placeholder and show board
+    saveScore({
+      name: '---',
+      score: state.score,
+      level: state.level,
+      lines: state.linesCleared,
+      date: savedDate,
+    });
+    renderScoreboard();
+  }
+}
+
+function renderScoreboard(): void {
   const scores = loadScores();
   const listEl = document.getElementById('high-scores-list');
   if (!listEl) return;
@@ -86,12 +97,13 @@ function showScoreboard(): void {
   if (scores.length === 0) {
     listEl.innerHTML = '<div class="no-scores">No scores yet — play again!</div>';
   } else {
-    let html = '<table class="score-table"><tr><th>#</th><th>SCORE</th><th>LEVEL</th><th>LINES</th></tr>';
+    let html = '<table class="score-table"><tr><th>#</th><th>NAME</th><th>SCORE</th><th>LEVEL</th><th>LINES</th></tr>';
     for (let i = 0; i < scores.length; i++) {
       const s = scores[i]!;
       const isLatest = s.date === savedDate;
       html += `<tr class="${isLatest ? 'highlight' : ''}">
         <td>${i + 1}</td>
+        <td>${s.name}</td>
         <td>${s.score.toLocaleString()}</td>
         <td>${s.level}</td>
         <td>${s.lines}</td>
@@ -102,6 +114,70 @@ function showScoreboard(): void {
   }
 
   scoreboardOverlay.classList.remove('hidden');
+}
+
+// ─── Name Entry ─────────────────────────────────────────────────
+
+let nameEntryActive = false;
+let nameChars: string[] = ['', '', ''];
+let nameCursor = 0;
+
+function startNameEntry(): void {
+  nameEntryActive = true;
+  nameChars = ['', '', ''];
+  nameCursor = 0;
+  updateNameSlots();
+  nameEntryOverlay.classList.remove('hidden');
+}
+
+function updateNameSlots(): void {
+  for (let i = 0; i < 3; i++) {
+    const slot = document.getElementById(`name-slot-${i}`);
+    if (!slot) continue;
+    slot.textContent = nameChars[i] || '';
+    slot.className = 'name-slot';
+    if (i === nameCursor) slot.classList.add('active');
+    if (nameChars[i]) slot.classList.add('filled');
+  }
+}
+
+function handleNameKey(key: string): void {
+  if (key === 'Enter') {
+    // Confirm — use 'AAA' if all empty
+    const finalName = nameChars.every(c => c === '') ? 'AAA' : nameChars.join('');
+    nameEntryActive = false;
+    nameEntryOverlay.classList.add('hidden');
+
+    saveScore({
+      name: finalName,
+      score: state.score,
+      level: state.level,
+      lines: state.linesCleared,
+      date: savedDate,
+    });
+    renderScoreboard();
+    return;
+  }
+
+  if (key === 'Backspace') {
+    if (nameCursor > 0) {
+      nameCursor--;
+      nameChars[nameCursor] = '';
+    } else {
+      nameChars[0] = '';
+    }
+    updateNameSlots();
+    return;
+  }
+
+  // A-Z only
+  if (/^[A-Za-z]$/.test(key)) {
+    nameChars[nameCursor] = key.toUpperCase();
+    if (nameCursor < 2) {
+      nameCursor++;
+    }
+    updateNameSlots();
+  }
 }
 
 function dismissScoreboard(): void {
@@ -116,6 +192,13 @@ const keys = new Set<string>();
 let vKeyReleased = true; // release-based double-tap guard (§17)
 
 document.addEventListener('keydown', (e) => {
+  // Name entry: capture all keys
+  if (nameEntryActive) {
+    e.preventDefault();
+    handleNameKey(e.key);
+    return;
+  }
+
   // Scoreboard overlay: any key restarts (game over)
   if (scoreboardShown) {
     e.preventDefault();

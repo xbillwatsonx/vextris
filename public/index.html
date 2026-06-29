@@ -8,7 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #000000;
-      color: #e0e0e0;
+      color: #F3EEFF;
       font-family: 'Segoe UI', system-ui, sans-serif;
       display: flex;
       flex-direction: column;
@@ -56,7 +56,7 @@
     #intro-overlay .prompt {
       margin-top: 32px;
       font-size: 1.1rem;
-      color: #8888aa;
+      color: #8E7BB6;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       animation: pulse 2s ease-in-out infinite;
@@ -82,7 +82,7 @@
     .instructions-inner {
       max-width: 520px;
       width: 100%;
-      color: #c0c0cc;
+      color: #D9C6FF;
       font-size: 0.95rem;
       line-height: 1.5;
     }
@@ -90,31 +90,31 @@
       text-align: center;
       font-size: 2.2rem;
       letter-spacing: 0.25em;
-      color: #b388ff;
+      color: #8B3FCF;
       margin-bottom: 8px;
     }
     .instructions-inner h2 {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.2em;
-      color: #8888aa;
+      color: #8E7BB6;
       margin: 24px 0 12px 0;
-      border-bottom: 1px solid #2a2a40;
+      border-bottom: 1px solid #24113D;
       padding-bottom: 6px;
     }
     .instructions-inner .tagline {
       text-align: center;
-      color: #c0c0cc;
+      color: #D9C6FF;
       margin-bottom: 12px;
     }
     .instructions-inner .hook {
-      color: #999;
+      color: #8E7BB6;
       font-size: 0.88rem;
       margin-bottom: 4px;
     }
     .spell-card {
-      background: #0a0a18;
-      border: 1px solid #1a1a30;
+      background: #140B24;
+      border: 1px solid #24113D;
       border-radius: 6px;
       padding: 12px;
       margin-bottom: 10px;
@@ -134,16 +134,16 @@
     }
     .spell-keys {
       font-size: 0.78rem;
-      color: #777;
+      color: #8E7BB6;
     }
     .spell-requirement {
       font-size: 0.78rem;
-      color: #cc8844;
+      color: #FF8C2A;
     }
     kbd {
       display: inline-block;
-      background: #1a1a2e;
-      border: 1px solid #333355;
+      background: #24113D;
+      border: 1px solid #6E2BFF;
       border-radius: 3px;
       padding: 0 5px;
       font-family: monospace;
@@ -160,12 +160,12 @@
       font-size: 0.9rem;
     }
     .controls-grid > div span:last-child {
-      color: #888;
+      color: #8E7BB6;
       font-family: monospace;
     }
     .closing {
       text-align: center;
-      color: #777;
+      color: #8E7BB6;
       font-size: 0.82rem;
       margin-top: 12px;
       line-height: 1.6;
@@ -174,7 +174,7 @@
       margin-top: 28px;
       text-align: center;
       font-size: 1rem;
-      color: #8888aa;
+      color: #8E7BB6;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       animation: pulse 2s ease-in-out infinite;
@@ -188,7 +188,7 @@
     #scoreboard-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(9, 6, 18, 0.92);
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -209,16 +209,16 @@
       text-align: center;
       font-size: 2rem;
       letter-spacing: 0.25em;
-      color: #b388ff;
+      color: #8B3FCF;
       margin-bottom: 8px;
     }
     .scoreboard-inner h2 {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: #8888aa;
+      color: #8E7BB6;
       margin: 20px 0 10px 0;
-      border-bottom: 1px solid #2a2a40;
+      border-bottom: 1px solid #24113D;
       padding-bottom: 6px;
     }
     .final-stats {
@@ -227,8 +227,8 @@
       gap: 8px;
     }
     .final-stat {
-      background: #0a0a18;
-      border: 1px solid #1a1a30;
+      background: #140B24;
+      border: 1px solid #24113D;
       border-radius: 6px;
       padding: 12px 8px;
       text-align: center;
@@ -237,13 +237,13 @@
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #666;
+      color: #8E7BB6;
       margin-bottom: 4px;
     }
     .final-stat .stat-num {
       font-size: 1.4rem;
       font-weight: 700;
-      color: #c0c0ff;
+      color: #F5B83D;
     }
     .score-table {
       width: 100%;
@@ -254,35 +254,35 @@
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #555;
+      color: #8E7BB6;
       text-align: right;
       padding: 6px 8px;
-      border-bottom: 1px solid #1a1a2e;
+      border-bottom: 1px solid #24113D;
     }
     .score-table th:first-child {
       text-align: left;
     }
     .score-table td {
       font-size: 0.85rem;
-      color: #999;
+      color: #D9C6FF;
       text-align: right;
       padding: 5px 8px;
-      border-bottom: 1px solid #0e0e1a;
+      border-bottom: 1px solid #140B24;
     }
     .score-table td:first-child {
       text-align: left;
-      color: #8888aa;
+      color: #8E7BB6;
       font-size: 0.75rem;
     }
     .score-table tr.highlight {
-      background: rgba(179,136,255,0.08);
+      background: rgba(139, 63, 207, 0.08);
     }
     .score-table tr.highlight td {
-      color: #b388ff;
+      color: #8B3FCF;
     }
     .no-scores {
       text-align: center;
-      color: #555;
+      color: #8E7BB6;
       padding: 24px 0;
       font-size: 0.9rem;
     }
@@ -290,13 +290,76 @@
       margin-top: 24px;
       text-align: center;
       font-size: 1rem;
-      color: #8888aa;
+      color: #8E7BB6;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       animation: pulse 2s ease-in-out infinite;
     }
+
+    /* ─── Name Entry Overlay ─────────────────────────────────── */
+    #name-entry-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #name-entry-overlay.hidden {
+      display: none;
+    }
+    .name-entry-inner {
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .name-entry-inner h1 {
+      font-size: 1.6rem;
+      letter-spacing: 0.2em;
+      color: #F5B83D;
+      margin-bottom: 8px;
+    }
+    .name-entry-inner .subtitle {
+      color: #D9C6FF;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .name-slots {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .name-slot {
+      width: 64px;
+      height: 80px;
+      background: #140B24;
+      border: 2px solid #6E2BFF;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      font-family: monospace;
+      color: #F3EEFF;
+      transition: border-color 0.15s;
+    }
+    .name-slot.active {
+      border-color: #2FE7FF;
+      box-shadow: 0 0 12px rgba(47, 231, 255, 0.3);
+    }
+    .name-slot.filled {
+      border-color: #B14CFF;
+    }
+    .name-entry-inner .hint {
+      color: #8E7BB6;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
     #game-canvas {
-      border: 1px solid #2a2a40;
+      border: 1px solid #6E2BFF;
       border-radius: 4px;
     }
     #side-panel {
@@ -306,8 +369,8 @@
       min-width: 180px;
     }
     .panel-section {
-      background: #141420;
-      border: 1px solid #2a2a40;
+      background: #140B24;
+      border: 1px solid #6E2BFF;
       border-radius: 6px;
       padding: 12px;
     }
@@ -315,7 +378,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #8888aa;
+      color: #8E7BB6;
       margin-bottom: 8px;
     }
     .stat-row {
@@ -326,7 +389,7 @@
     }
     .stat-value {
       font-weight: 600;
-      color: #c0c0ff;
+      color: #F5B83D;
     }
     #spell-bank .spells-legend {
       display: flex;
@@ -334,7 +397,7 @@
       flex-wrap: wrap;
       margin-top: 6px;
       font-size: 0.65rem;
-      color: #666;
+      color: #8E7BB6;
     }
     #spell-bank .spells-legend span {
       display: inline-flex;
@@ -351,8 +414,8 @@
       cursor: default;
     }
     .spell-item.selected {
-      background: rgba(124,77,255,0.2);
-      border: 1px solid rgba(179,136,255,0.4);
+      background: rgba(139, 63, 207, 0.2);
+      border: 1px solid rgba(139, 63, 207, 0.4);
     }
     .spell-icon {
       display: inline-block;
@@ -365,12 +428,12 @@
     }
     .spell-label {
       font-size: 0.7rem;
-      color: #aaa;
+      color: #D9C6FF;
       flex-shrink: 0;
     }
     .spell-effect {
       font-size: 0.65rem;
-      color: #666;
+      color: #8E7BB6;
     }
     .spell-item.locked {
       opacity: 0.35;
@@ -416,7 +479,7 @@
 
       <p class="tagline">Vextris is a classic falling-block game with magic spells.</p>
 
-      <p class="hook">Vex glyphs <span style="color:#b388ff">✦</span> appear on random blocks as they fall.
+      <p class="hook">Vex glyphs <span style="color:#8B3FCF">✦</span> appear on random blocks as they fall.
       Lock two marked cells beside each other in any orientation to earn a spell.</p>
 
       <section>
@@ -424,7 +487,7 @@
 
         <div class="spell-card">
           <div class="spell-head">
-            <span class="spell-symbol" style="color:#b388ff">◆</span>
+            <span class="spell-symbol" style="color:#FF4FD8">◆</span>
             <strong>Color Vex</strong>
           </div>
           <p>Clears every cell of one random color.</p>
@@ -433,7 +496,7 @@
 
         <div class="spell-card">
           <div class="spell-head">
-            <span class="spell-symbol" style="color:#69f0ae">◈</span>
+            <span class="spell-symbol" style="color:#2FE7FF">◈</span>
             <strong>Shape Vex</strong>
           </div>
           <p>Clears every cell matching one random piece shape.</p>
@@ -442,7 +505,7 @@
 
         <div class="spell-card">
           <div class="spell-head">
-            <span class="spell-symbol" style="color:#7c4dff">◉</span>
+            <span class="spell-symbol" style="color:#6E2BFF">◉</span>
             <strong>Shadow Vex</strong>
           </div>
           <p>Inverts the board. Empty cells become filled, and filled cells become empty.</p>
@@ -521,6 +584,21 @@
       <div class="prompt">PRESS ANY KEY TO RESTART</div>
     </div>
   </div>
+
+  <!-- Name entry overlay: 3-letter initials for high scores -->
+  <div id="name-entry-overlay" class="hidden">
+    <div class="name-entry-inner">
+      <h1>NEW HIGH SCORE</h1>
+      <p class="subtitle">Enter your initials</p>
+      <div class="name-slots">
+        <div class="name-slot active" id="name-slot-0"></div>
+        <div class="name-slot" id="name-slot-1"></div>
+        <div class="name-slot" id="name-slot-2"></div>
+      </div>
+      <p class="hint">A–Z · BACKSPACE · ENTER to confirm</p>
+    </div>
+  </div>
+
   <script type="module" src="/main.ts"></script>
 </body>
 </html>

@@ -13,22 +13,22 @@ import { getBlocks, getColor } from '../engine/pieces';
 // ─── Colors (§8) ────────────────────────────────────────────────
 
 const CELL_COLORS: Record<string, string> = {
-  cyan:    '#00e5ff',
-  gold:    '#ffd600',
-  violet:  '#b388ff',
-  green:   '#69f0ae',
-  red:     '#ff5252',
-  blue:    '#448aff',
-  orange:  '#ff9100',
-  shadow:  '#2a0033',
+  cyan:    '#2FE7FF',  // Crystal Cyan
+  gold:    '#F5B83D',  // Rune Gold
+  violet:  '#8B3FCF',  // Deep Purple
+  green:   '#2EBD6F',  // Dark Jewel Green
+  red:     '#FF4FD8',  // Spell Pink
+  blue:    '#2563EB',  // Cobalt Blue
+  orange:  '#FF8C2A',  // Amber Flame
+  shadow:  '#24113D',  // Deep Rune Purple
 };
 
-const CELL_BORDER = '#1a1a2e';
-const GRID_COLOR = '#12122a';
-const BG_COLOR = '#000000';
+const CELL_BORDER = '#140B24';  // Temple Indigo
+const GRID_COLOR = '#2A1840';
+const BG_COLOR = '#090612';     // Void Black
 const GHOST_ALPHA = 0.25;
-const VEX_GLOW_COLOR = '#c084fc'; // neon purple
-const VEX_CORE_COLOR = '#e4c8ff'; // bright core
+const VEX_GLOW_COLOR = '#8B3FCF'; // Deep Purple
+const VEX_CORE_COLOR = '#D9C6FF'; // Soft Lavender
 const CELL_SIZE_PX = 32;
 
 // ─── Drawing Helpers ────────────────────────────────────────────
@@ -261,9 +261,9 @@ const VEX_EFFECTS: Record<string, string> = {
 };
 
 const VEX_ICON_COLORS: Record<string, string> = {
-  COLOR: '#b388ff',
-  SHAPE: '#69f0ae',
-  SHADOW: '#7c4dff',
+  COLOR: '#FF4FD8',   // Spell Pink
+  SHAPE: '#2FE7FF',   // Crystal Cyan
+  SHADOW: '#6E2BFF',  // Arcane Purple
 };
 
 export function renderSpellBank(
@@ -273,7 +273,7 @@ export function renderSpellBank(
   visibleFillPercent: number,
 ): void {
   if (spellBank.length === 0) {
-    container.innerHTML = '<span style="color:#555;font-size:0.8rem">No vex stored</span>';
+    container.innerHTML = '<span style="color:#8E7BB6;font-size:0.8rem">No vex stored</span>';
     return;
   }
 
