@@ -21,7 +21,11 @@ const LEVEL_TRACKS = [
   'music/Vextris-07.ogg',
 ] as const;
 
-const DANGER_TRACK = 'music/Vextris-Danger-State.ogg';
+/** High-energy tracks used when danger state activates. */
+const DANGER_TRACKS = [
+  'music/Vextris-Emergency.ogg',
+  'music/Vextris-Danger-State.ogg',
+] as const;
 
 /** Board fill % that triggers danger state (0-1). */
 const DANGER_FILL_THRESHOLD = 0.70;
@@ -45,6 +49,9 @@ let levelAudio: HTMLAudioElement | null = null;
 
 /** Audio element for the danger track (when active). */
 let dangerAudio: HTMLAudioElement | null = null;
+
+/** Next high-energy track to use; alternates on each danger activation. */
+let nextDangerTrackIndex = 0;
 
 /** Which level track index is currently loaded (-1 = none). */
 let currentLevelIndex = -1;
@@ -176,10 +183,14 @@ function activateDanger(): void {
   if (dangerActive) return;
   dangerActive = true;
 
-  // Create danger audio if needed
-  if (!dangerAudio) {
-    dangerAudio = createAudioElement(DANGER_TRACK);
+  // Alternate high-energy tracks so both get time in the danger-state rotation.
+  if (dangerAudio) {
+    dangerAudio.pause();
+    dangerAudio.currentTime = 0;
   }
+  const nextTrack = DANGER_TRACKS[nextDangerTrackIndex] ?? DANGER_TRACKS[0];
+  nextDangerTrackIndex = (nextDangerTrackIndex + 1) % DANGER_TRACKS.length;
+  dangerAudio = createAudioElement(nextTrack);
 
   dangerAudio.play().catch(() => {
     // Autoplay policy
@@ -345,6 +356,7 @@ export function resetMusic(): void {
   }
   currentLevelIndex = -1;
   dangerActive = false;
+  nextDangerTrackIndex = 0;
   currentPhase = 'playing';
   // Restart with level 1 track
   switchLevelTrack(0);
