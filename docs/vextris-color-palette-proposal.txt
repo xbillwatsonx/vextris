@@ -1,0 +1,593 @@
+1. Master palette
+
+Foundation
+
+Void Black #090612
+
+Temple Indigo #140B24
+
+Deep Rune Purple #24113D
+
+
+Main identity
+
+Arcane Purple #6E2BFF
+
+Neon Violet #B14CFF
+
+Crystal Cyan #2FE7FF
+
+Electric Blue #3B82FF
+
+
+Highlights
+
+Rune Gold #F5B83D
+
+Amber Flame #FF8C2A
+
+Spell Pink #FF4FD8
+
+
+Readable light colors
+
+Soft Lavender #D9C6FF
+
+Moon Mist #F3EEFF
+
+
+
+---
+
+2. Use this balance rule
+
+This keeps the game from turning into a rainbow mess.
+
+70% dark foundation
+
+20% purple / blue identity
+
+10% hot accents and gold
+
+
+That means most of the screen should stay dark, purple should define the game’s personality, and gold / pink / orange should only show up where the player needs to feel energy or importance.
+
+
+---
+
+3. Full UI color assignments
+
+A. Main background
+
+Use layered darks, not flat black.
+
+Main background: #090612
+
+Secondary background zones: #140B24
+
+Inset areas / recessed UI: #24113D
+
+
+Good for:
+
+title screen backdrop
+
+outer play area
+
+score panel background
+
+menu screen base
+
+
+
+---
+
+B. Game board
+
+Keep the board readable and magical.
+
+Board frame: #6E2BFF
+
+Board inner background: #10081B
+
+Board grid lines: #2A1840
+
+Inner glow around board edge: #B14CFF at low opacity
+
+Filled cell shadow: #05030B
+
+
+This gives you:
+
+clear board shape
+
+dark playfield
+
+visible grid without clutter
+
+purple magical identity
+
+
+
+---
+
+C. Panels and boxes
+
+For score boxes, menus, spell panels, instructions.
+
+Panel fill: #140B24
+
+Panel border: #6E2BFF
+
+Selected panel border: #2FE7FF
+
+Panel glow: #B14CFF
+
+
+
+---
+
+D. Text system
+
+This part matters a lot.
+
+Primary text
+
+Primary UI text: #F3EEFF
+
+
+Secondary text
+
+Secondary UI text: #D9C6FF
+
+
+Dim or inactive text
+
+Inactive text: #8E7BB6
+
+
+Important numbers
+
+High score / score emphasis: #F5B83D
+
+
+Warning text
+
+Warning / urgent text: #FF8C2A
+
+
+Critical danger text
+
+Critical / near loss text: #FF4FD8
+
+
+Use pure white rarely. The lavender-white mix will look more magical and less sterile.
+
+
+---
+
+4. Menu and button states
+
+Normal button
+
+Fill: #24113D
+
+Border: #6E2BFF
+
+Text: #D9C6FF
+
+
+Hover / selected
+
+Fill: #2C1450
+
+Border: #2FE7FF
+
+Text: #F3EEFF
+
+Glow: #2FE7FF
+
+
+Confirm / action
+
+Fill: #3A1A5F
+
+Border: #F5B83D
+
+Text: #F5B83D
+
+
+Disabled
+
+Fill: #120D1A
+
+Border: #3A2B52
+
+Text: #6F638A
+
+
+
+---
+
+5. Scoring and reward colors
+
+Score
+
+Current score: #F5B83D
+
+High score label: #B14CFF
+
+Combo count: #2FE7FF
+
+Chain bonus / spell earned: #FF4FD8
+
+
+Positive flashes
+
+line clear sparkle: #2FE7FF
+
+combo burst: #F5B83D
+
+rare event burst: #FF4FD8
+
+
+Gold should feel rewarding. Cyan should feel skillful. Pink should feel special.
+
+
+---
+
+6. Spell color assignments
+
+You already have named spell concepts. Give each one its own identity.
+
+Color Vex ◆
+
+This should feel vibrant and spectrum-driven.
+
+Main color: #FF4FD8
+
+Secondary color: #2FE7FF
+
+Accent: #F5B83D
+
+
+Visual feeling:
+
+shifting energy
+
+chromatic sparks
+
+magical re-coloring
+
+
+
+---
+
+Shape Vex ◈
+
+This should feel crystalline and structured.
+
+Main color: #2FE7FF
+
+Secondary color: #3B82FF
+
+Accent: #D9C6FF
+
+
+Visual feeling:
+
+crystal geometry
+
+rune precision
+
+clean transformation
+
+
+
+---
+
+Shadow Vex ◉
+
+This should feel ominous and inverted.
+
+Main color: #6E2BFF
+
+Secondary color: #24113D
+
+Accent glow: #FF4FD8
+
+
+Visual feeling:
+
+corrupted magic
+
+void pressure
+
+unstable board state
+
+
+
+---
+
+7. Danger state system
+
+This is where the palette becomes reactive.
+
+Normal play
+
+darks + purple + cyan
+
+calm but energized
+
+
+Elevated pressure
+
+When the board is getting crowded:
+
+boost glow intensity on #B14CFF
+
+add more #FF8C2A to UI accents
+
+make combo / meter edges pulse slightly
+
+
+Near loss
+
+When the player is close to topping out:
+
+warning text: #FF8C2A
+
+critical pulse: #FF4FD8
+
+board border shifts from #6E2BFF toward #FF4FD8
+
+subtle screen edge pulse in pink-violet
+
+
+That preserves the Vextris identity while increasing urgency.
+
+
+---
+
+8. Shadow Vex mode palette
+
+This mode deserves a slight visual takeover.
+
+Background shift
+
+base dark stays #090612
+
+increase #24113D
+
+reduce gold usage
+
+make cyan rarer
+
+
+Board shift
+
+board border becomes #B14CFF
+
+inner glow deepens
+
+cell shadows become heavier
+
+
+UI shift
+
+text stays readable
+
+important elements glow with purple-pink
+
+score can remain gold so the player still knows what matters
+
+
+Think “the game falls under a magical eclipse.”
+
+
+---
+
+9. Logo and title styling
+
+For the Vextris logo, use the cabinet image language.
+
+Recommended title stack
+
+Main fill: #F5B83D
+
+Inner shading: darker gold / amber feel
+
+Primary outline: #6E2BFF
+
+Outer glow: #B14CFF
+
+Crystal accent details: #2FE7FF
+
+
+That gives you:
+
+retro arcade readability
+
+magical prestige
+
+strong contrast on dark backgrounds
+
+
+
+---
+
+10. Particle and effect colors
+
+Sparkles
+
+#B14CFF
+
+#2FE7FF
+
+#FF4FD8
+
+
+Runes / glyphs
+
+#6E2BFF
+
+#D9C6FF
+
+
+Explosions / clears
+
+#2FE7FF for clean clears
+
+#F5B83D for reward bursts
+
+#FF4FD8 for rare / magical events
+
+
+Ambient glows
+
+low-opacity #B14CFF
+
+occasional #2FE7FF glint
+
+
+
+---
+
+11. Piece color system
+
+If your gameplay pieces are still classic multicolor blocks, keep them colorful but jewel-like so they match the world.
+
+Use these as the block palette:
+
+Cyan piece: #2FE7FF
+
+Blue piece: #3B82FF
+
+Orange piece: #FF8C2A
+
+Gold piece: #F5B83D
+
+Green piece: #46E38A
+
+Purple piece: #B14CFF
+
+Pink-red piece: #FF4FD8
+
+
+Piece treatment
+
+Each block should have:
+
+a darker lower edge
+
+a soft inner glow
+
+a crystal or rune-like shine
+
+dark outline or shadow for readability
+
+
+That keeps them feeling like magical arcade gems instead of plain plastic blocks.
+
+
+---
+
+12. Quick reference system
+
+If you just want the fastest version:
+
+Background
+
+#090612
+
+#140B24
+
+
+Main brand colors
+
+#6E2BFF
+
+#B14CFF
+
+#2FE7FF
+
+
+Important highlights
+
+#F5B83D
+
+#FF8C2A
+
+#FF4FD8
+
+
+Readable text
+
+#F3EEFF
+
+#D9C6FF
+
+
+
+---
+
+13. My recommended locked palette for Vextris
+
+If I were freezing the brand right now, I’d lock these as the official colors:
+
+Void Black #090612
+
+Temple Indigo #140B24
+
+Deep Rune Purple #24113D
+
+Arcane Purple #6E2BFF
+
+Neon Violet #B14CFF
+
+Crystal Cyan #2FE7FF
+
+Electric Blue #3B82FF
+
+Rune Gold #F5B83D
+
+Amber Flame #FF8C2A
+
+Spell Pink #FF4FD8
+
+Soft Lavender #D9C6FF
+
+Moon Mist #F3EEFF
+
+
+
+---
+
+14. Best next step
+
+The next thing you need is a state-by-state style sheet so the game stays visually consistent.
+
+I can do that next and map this palette into:
+
+1. Title screen
+
+
+2. Main gameplay HUD
+
+
+3. Pause menu
+
+
+4. Game over screen
+
+
+5. Spell UI
+
+
+6. Danger state
+
+
+7. Shadow Vex mode
+
+
+8. Retro arcade cabinet trim and lighting
