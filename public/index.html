@@ -439,24 +439,108 @@
       opacity: 0.35;
     }
 
-    /* ─── Responsive: small screens ─────────────────────────── */
-    @media (max-width: 560px) {
+    /* ─── Mobile portrait touch layout ─────────────────────────── */
+    #mobile-hud,
+    #touch-dock,
+    .touch-controls-note {
+      display: none;
+    }
+    @media (pointer: coarse) and (orientation: portrait) {
       body {
-        overflow-y: auto;
-        min-height: auto;
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+        justify-content: flex-start;
+        gap: 8px;
+        padding:
+          max(8px, env(safe-area-inset-top))
+          max(8px, env(safe-area-inset-right))
+          max(8px, env(safe-area-inset-bottom))
+          max(8px, env(safe-area-inset-left));
+      }
+      #logo-container,
+      #side-panel {
+        display: none;
+      }
+      #mobile-hud {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
+        align-items: center;
+        gap: 6px;
+        width: min(100%, 420px);
+        font-size: 0.72rem;
+      }
+      .mobile-stat {
+        min-width: 0;
+        color: #8E7BB6;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .mobile-stat output {
+        display: block;
+        overflow: hidden;
+        color: #F5B83D;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .mobile-hud-button,
+      .touch-control {
+        min-height: 48px;
+        border: 1px solid #6E2BFF;
+        border-radius: 6px;
+        background: #140B24;
+        color: #F3EEFF;
+        font: inherit;
+        touch-action: manipulation;
+      }
+      .mobile-hud-button {
+        padding: 0 10px;
       }
       #game-container {
-        flex-direction: column;
-        gap: 12px;
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        max-width: 420px;
+        align-items: center;
+        justify-content: center;
       }
       #game-canvas {
-        max-width: 100%;
+        width: auto;
         height: auto;
+        max-width: 100%;
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 176px);
+        aspect-ratio: 1 / 2;
       }
-      #side-panel {
-        min-width: unset;
-        width: 100%;
-        max-width: 320px;
+      #touch-dock {
+        display: grid;
+        gap: 6px;
+        width: min(100%, 420px);
+      }
+      .touch-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .touch-control {
+        padding: 6px 4px;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      .touch-control:active,
+      .touch-control:focus-visible,
+      .mobile-hud-button:focus-visible {
+        border-color: #2FE7FF;
+        box-shadow: 0 0 10px rgba(47, 231, 255, 0.35);
+        outline: none;
+      }
+      .touch-controls-note {
+        display: block;
+        color: #8E7BB6;
+        font-size: 0.8rem;
+        margin-top: 10px;
       }
     }
   </style>
@@ -471,6 +555,14 @@
     <img src="intro-16x9.jpg" alt="Vextris Intro" />
     <div class="prompt">Press any key to continue</div>
   </div>
+
+  <section id="mobile-hud" aria-label="Game status">
+    <div class="mobile-stat">Score<output id="mobile-score">0</output></div>
+    <div class="mobile-stat">Level<output id="mobile-level">1</output></div>
+    <div class="mobile-stat">Spell<output id="mobile-selected-spell">No vex</output></div>
+    <button id="mobile-pause" class="mobile-hud-button" type="button" aria-pressed="false">Pause</button>
+    <button id="mobile-mute" class="mobile-hud-button" type="button" aria-pressed="false">Mute</button>
+  </section>
 
   <!-- Instructions overlay: spells + controls + "Press any key to begin" -->
   <div id="instructions-overlay" class="hidden">
@@ -525,6 +617,7 @@
           <div><span>Pause</span><span>P / Esc</span></div>
           <div><span>Mute</span><span>M</span></div>
         </div>
+        <p class="touch-controls-note">Touch: use the control dock below the board during play.</p>
       </section>
 
       <p class="closing">Clear lines to score points and level up.<br>
@@ -556,6 +649,21 @@
       </div>
     </div>
   </div>
+
+  <section id="touch-dock" aria-label="Touch controls">
+    <div class="touch-row">
+      <button id="touch-rotate-ccw" class="touch-control" type="button" aria-label="Rotate counter-clockwise">Rotate CCW</button>
+      <button id="touch-rotate-cw" class="touch-control" type="button" aria-label="Rotate clockwise">Rotate CW</button>
+      <button id="touch-cycle-vex" class="touch-control" type="button" aria-label="Cycle selected spell">Cycle</button>
+      <button id="touch-cast-vex" class="touch-control" type="button" aria-label="Cast selected spell">Cast</button>
+    </div>
+    <div class="touch-row">
+      <button id="touch-left" class="touch-control touch-control-held" type="button" aria-label="Move left">Left</button>
+      <button id="touch-down" class="touch-control touch-control-held" type="button" aria-label="Soft drop">Down</button>
+      <button id="touch-right" class="touch-control touch-control-held" type="button" aria-label="Move right">Right</button>
+      <button id="touch-hard-drop" class="touch-control" type="button" aria-label="Hard drop">Hard Drop</button>
+    </div>
+  </section>
 
   <!-- Scoreboard overlay: game-over stats + high scores -->
   <div id="scoreboard-overlay" class="hidden">
