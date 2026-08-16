@@ -469,8 +469,16 @@ function handleHeldKeys(deltaMs: number): void {
 // Game begins in READY state. Intro screen is shown via the overlay.
 // Phase 1: artwork → any key shows instructions
 // Phase 2: instructions → any key starts the game
-introOverlay.addEventListener('click', advanceIntro);
-instructionsOverlay.addEventListener('click', advanceIntro);
+function advanceIntroFromPointer(event: PointerEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
+  advanceIntro();
+}
+
+// Pointer events make the intro reliably advance on touch screens without
+// waiting for a synthesized click event.
+introOverlay.addEventListener('pointerup', advanceIntroFromPointer);
+instructionsOverlay.addEventListener('pointerup', advanceIntroFromPointer);
 scoreboardOverlay.addEventListener('click', dismissScoreboard);
 wireNameEntryKeypad();
 

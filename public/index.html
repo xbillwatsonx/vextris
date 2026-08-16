@@ -376,6 +376,10 @@
       color: #F3EEFF;
       font: 700 0.85rem/1 system-ui, sans-serif;
       touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .name-key.wide { grid-column: span 3; }
     .name-key.confirm { grid-column: span 4; border-color: #2FE7FF; }
@@ -496,6 +500,7 @@
 
     /* Touch guidance is only relevant on coarse-pointer portrait devices. */
     .touch-controls-note { display: none; }
+    .mobile-instructions { display: none; }
 
     /* ─── Mobile portrait touch layout (active gameplay only) ─── */
     body:not(.is-mobile-gameplay) #mobile-hud,
@@ -565,6 +570,10 @@
         color: #F3EEFF;
         font: inherit;
         touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
       }
       body.is-mobile-gameplay .mobile-hud-button {
         padding: 0 10px;
@@ -615,6 +624,21 @@
         font-size: 0.8rem;
         margin-top: 10px;
       }
+      .desktop-instructions { display: none; }
+      .mobile-instructions { display: block; }
+      .mobile-instructions .touch-guide {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .mobile-instructions .touch-guide div {
+        background: #140B24;
+        border: 1px solid #24113D;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 0.8rem;
+      }
+      .mobile-instructions strong { color: #F3EEFF; }
     }
   </style>
 </head>
@@ -642,6 +666,7 @@
     <div class="instructions-inner">
       <h1>VEXTRIS</h1>
 
+      <div class="desktop-instructions">
       <p class="tagline">Vextris is a classic falling-block game with magic spells.</p>
 
       <p class="hook">Vex glyphs <span style="color:#8B3FCF">✦</span> appear on random blocks as they fall.
@@ -697,6 +722,32 @@
       The game speeds up as you climb.</p>
 
       <p class="closing">Survive as long as you can. Rack up as many points as you can.</p>
+      </div>
+
+      <div class="mobile-instructions">
+        <p class="tagline">Stack blocks. Clear lines. Build up your vex spells.</p>
+        <p class="hook">Lock two glowing <span style="color:#8B3FCF">✦</span> blocks together to earn a spell.</p>
+
+        <section>
+          <h2>TOUCH CONTROLS</h2>
+          <div class="touch-guide">
+            <div><strong>Cast</strong><br>Use your selected spell.</div>
+            <div><strong>Rotate</strong><br>Turn the falling piece.</div>
+            <div><strong>Cycle</strong><br>Select your next spell.</div>
+            <div><strong>Hard Drop</strong><br>Place the piece now.</div>
+            <div><strong>Left / Right</strong><br>Hold to move.</div>
+            <div><strong>Down</strong><br>Hold to soft drop.</div>
+          </div>
+          <p class="touch-controls-note">Pause and Mute are in the top bar during play.</p>
+        </section>
+
+        <section>
+          <h2>SPELLS</h2>
+          <p><strong>Color ◆</strong> clears one color.</p>
+          <p><strong>Shape ◈</strong> clears one shape.</p>
+          <p><strong>Shadow ◉</strong> flips the board at 40% fill.</p>
+        </section>
+      </div>
 
       <div class="prompt">PRESS ANY KEY TO BEGIN</div>
     </div>
@@ -725,16 +776,16 @@
 
   <section id="touch-dock" aria-label="Touch controls">
     <div class="touch-row">
-      <button id="touch-rotate-ccw" class="touch-control" type="button" data-action="ROTATE_CCW" aria-label="Rotate counter-clockwise">Rotate CCW</button>
-      <button id="touch-rotate-cw" class="touch-control" type="button" data-action="ROTATE_CW" aria-label="Rotate clockwise">Rotate CW</button>
-      <button id="touch-cycle-vex" class="touch-control" type="button" data-action="CYCLE_VEX" aria-label="Cycle selected spell">Cycle</button>
       <button id="touch-cast-vex" class="touch-control" type="button" data-action="CAST_VEX" aria-label="Cast selected spell">Cast</button>
+      <button id="touch-rotate-ccw" class="touch-control" type="button" data-action="ROTATE_CCW" aria-label="Rotate counter-clockwise">Rotate CCW</button>
+      <button id="touch-cycle-vex" class="touch-control" type="button" data-action="CYCLE_VEX" aria-label="Cycle selected spell">Cycle</button>
+      <button id="touch-rotate-cw" class="touch-control" type="button" data-action="ROTATE_CW" aria-label="Rotate clockwise">Rotate CW</button>
     </div>
     <div class="touch-row">
+      <button id="touch-hard-drop" class="touch-control" type="button" data-action="HARD_DROP" aria-label="Hard drop">Hard Drop</button>
       <button id="touch-left" class="touch-control touch-control-held" type="button" data-held-key="ArrowLeft" aria-label="Move left">Left</button>
       <button id="touch-down" class="touch-control touch-control-held" type="button" data-held-key="ArrowDown" aria-label="Soft drop">Down</button>
       <button id="touch-right" class="touch-control touch-control-held" type="button" data-held-key="ArrowRight" aria-label="Move right">Right</button>
-      <button id="touch-hard-drop" class="touch-control" type="button" data-action="HARD_DROP" aria-label="Hard drop">Hard Drop</button>
     </div>
   </section>
 
