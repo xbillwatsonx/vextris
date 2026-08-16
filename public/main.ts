@@ -15,6 +15,8 @@ import { saveScore, loadScores, isHighScore } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 import { getVisibleFillPercent } from '../src/engine/board';
 import { getMobileControlPresentation, shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
+import { PointerHeldInputs } from '../src/input/heldInputs';
+import type { HeldKey } from '../src/input/heldInputs';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -197,6 +199,7 @@ function dismissScoreboard(): void {
 // ─── Input State ────────────────────────────────────────────────
 
 const keys = new Set<string>();
+const pointerHeldInputs = new PointerHeldInputs();
 let vKeyReleased = true; // release-based double-tap guard (§17)
 
 function runOneShotGameAction(action: GameAction): void {
@@ -289,8 +292,10 @@ function updateMobileGameplayPresentation(): void {
 function updateMobileControlPresentation(): void {
   const controls = getMobileControlPresentation(state.status, isMuted());
   mobilePauseButton.textContent = controls.pause.label;
+  mobilePauseButton.setAttribute('aria-label', controls.pause.label);
   mobilePauseButton.setAttribute('aria-pressed', String(controls.pause.pressed));
   mobileMuteButton.textContent = controls.mute.label;
+  mobileMuteButton.setAttribute('aria-label', controls.mute.label);
   mobileMuteButton.setAttribute('aria-pressed', String(controls.mute.pressed));
 }
 
@@ -301,6 +306,71 @@ function toggleAudioMute(): void {
 }
 
 coarsePortraitQuery.addEventListener('change', updateMobileGameplayPresentation);
+
+function stopTouchButtonEvent(event: PointerEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function capturePointer(button: HTMLButtonElement, pointerId: number): void {
+  try {
+    button.setPointerCapture(pointerId);
+  } catch {
+    // A cancelled pointer can no longer be captured; cleanup remains safe.
+  }
+}
+
+function setPressed(button: HTMLButtonElement, pressed: boolean): void {
+  button.classList.toggle('is-pressed', pressed);
+}
+
+function releaseHeldPointer(event: PointerEvent, button: HTMLButtonElement): void {
+  stopTouchButtonEvent(event);
+  pointerHeldInputs.remove(event.pointerId);
+  setPressed(button, false);
+}
+
+function wireTouchControls(): void {
+  const actionButtons = document.querySelectorAll<HTMLButtonElement>('[data-action]');
+  for (const button of actionButtons) {
+    button.addEventListener('pointerdown', (event) => {
+      stopTouchButtonEvent(event);
+      capturePointer(button, event.pointerId);
+      setPressed(button, true);
+      const action = button.dataset.action;
+      if (action === 'TOGGLE_MUTE') {
+        toggleAudioMute();
+      } else if (action) {
+        runOneShotGameAction(action as GameAction);
+      }
+    });
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+      button.addEventListener(eventName, (event) => {
+        stopTouchButtonEvent(event);
+        setPressed(button, false);
+      });
+    }
+  }
+
+  const heldButtons = document.querySelectorAll<HTMLButtonElement>('[data-held-key]');
+  for (const button of heldButtons) {
+    const key = button.dataset.heldKey as HeldKey;
+    button.addEventListener('pointerdown', (event) => {
+      stopTouchButtonEvent(event);
+      capturePointer(button, event.pointerId);
+      pointerHeldInputs.add(event.pointerId, key);
+      setPressed(button, true);
+    });
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+      button.addEventListener(eventName, (event) => releaseHeldPointer(event, button));
+    }
+  }
+}
+
+window.addEventListener('blur', () => pointerHeldInputs.clear());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') pointerHeldInputs.clear();
+});
 
 function restartGame(): void {
   const newSeed = 'VEXTRIS-' + Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -352,9 +422,9 @@ function gameLoop(now: number): void {
 }
 
 function handleHeldKeys(deltaMs: number): void {
-  const leftHeld = keys.has('ArrowLeft');
-  const rightHeld = keys.has('ArrowRight');
-  const downHeld = keys.has('ArrowDown');
+  const leftHeld = pointerHeldInputs.isHeld('ArrowLeft', keys);
+  const rightHeld = pointerHeldInputs.isHeld('ArrowRight', keys);
+  const downHeld = pointerHeldInputs.isHeld('ArrowDown', keys);
 
   // Rotation (one-shot, triggered once on press)
   // Already handled in keydown — DAS not needed for rotation
@@ -419,6 +489,7 @@ function handleHeldKeys(deltaMs: number): void {
 introOverlay.addEventListener('click', advanceIntro);
 instructionsOverlay.addEventListener('click', advanceIntro);
 scoreboardOverlay.addEventListener('click', dismissScoreboard);
+wireTouchControls();
 
 console.log(`Vextris loaded. Seed: ${state.rngSeed}`);
 updateMobileGameplayPresentation();

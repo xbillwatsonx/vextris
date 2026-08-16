@@ -564,7 +564,9 @@
         font-weight: 700;
       }
       body.is-mobile-gameplay .touch-control:active,
+      body.is-mobile-gameplay .touch-control.is-pressed,
       body.is-mobile-gameplay .touch-control:focus-visible,
+      body.is-mobile-gameplay .mobile-hud-button.is-pressed,
       body.is-mobile-gameplay .mobile-hud-button:focus-visible {
         border-color: #2FE7FF;
         box-shadow: 0 0 10px rgba(47, 231, 255, 0.35);
@@ -594,8 +596,8 @@
     <div class="mobile-stat">Score<output id="mobile-score">0</output></div>
     <div class="mobile-stat">Level<output id="mobile-level">1</output></div>
     <div class="mobile-stat">Spell<output id="mobile-selected-spell">No vex</output></div>
-    <button id="mobile-pause" class="mobile-hud-button" type="button" aria-pressed="false">Pause</button>
-    <button id="mobile-mute" class="mobile-hud-button" type="button" aria-pressed="false">Mute</button>
+    <button id="mobile-pause" class="mobile-hud-button" type="button" data-action="TOGGLE_PAUSE" aria-label="Pause" aria-pressed="false">Pause</button>
+    <button id="mobile-mute" class="mobile-hud-button" type="button" data-action="TOGGLE_MUTE" aria-label="Mute" aria-pressed="false">Mute</button>
   </section>
 
   <!-- Instructions overlay: spells + controls + "Press any key to begin" -->
@@ -686,16 +688,16 @@
 
   <section id="touch-dock" aria-label="Touch controls">
     <div class="touch-row">
-      <button id="touch-rotate-ccw" class="touch-control" type="button" aria-label="Rotate counter-clockwise">Rotate CCW</button>
-      <button id="touch-rotate-cw" class="touch-control" type="button" aria-label="Rotate clockwise">Rotate CW</button>
-      <button id="touch-cycle-vex" class="touch-control" type="button" aria-label="Cycle selected spell">Cycle</button>
-      <button id="touch-cast-vex" class="touch-control" type="button" aria-label="Cast selected spell">Cast</button>
+      <button id="touch-rotate-ccw" class="touch-control" type="button" data-action="ROTATE_CCW" aria-label="Rotate counter-clockwise">Rotate CCW</button>
+      <button id="touch-rotate-cw" class="touch-control" type="button" data-action="ROTATE_CW" aria-label="Rotate clockwise">Rotate CW</button>
+      <button id="touch-cycle-vex" class="touch-control" type="button" data-action="CYCLE_VEX" aria-label="Cycle selected spell">Cycle</button>
+      <button id="touch-cast-vex" class="touch-control" type="button" data-action="CAST_VEX" aria-label="Cast selected spell">Cast</button>
     </div>
     <div class="touch-row">
-      <button id="touch-left" class="touch-control touch-control-held" type="button" aria-label="Move left">Left</button>
-      <button id="touch-down" class="touch-control touch-control-held" type="button" aria-label="Soft drop">Down</button>
-      <button id="touch-right" class="touch-control touch-control-held" type="button" aria-label="Move right">Right</button>
-      <button id="touch-hard-drop" class="touch-control" type="button" aria-label="Hard drop">Hard Drop</button>
+      <button id="touch-left" class="touch-control touch-control-held" type="button" data-held-key="ArrowLeft" aria-label="Move left">Left</button>
+      <button id="touch-down" class="touch-control touch-control-held" type="button" data-held-key="ArrowDown" aria-label="Soft drop">Down</button>
+      <button id="touch-right" class="touch-control touch-control-held" type="button" data-held-key="ArrowRight" aria-label="Move right">Right</button>
+      <button id="touch-hard-drop" class="touch-control" type="button" data-action="HARD_DROP" aria-label="Hard drop">Hard Drop</button>
     </div>
   </section>
 

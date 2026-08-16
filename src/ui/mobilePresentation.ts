@@ -7,7 +7,7 @@ export interface MobileControlState {
 
 /** Whether a coarse portrait viewport should show its in-play mobile UI. */
 export function shouldUseMobileGameplayPresentation(status: GameStatus, isCoarsePortrait: boolean): boolean {
-  return isCoarsePortrait && status === 'PLAYING';
+  return isCoarsePortrait && (status === 'PLAYING' || status === 'PAUSED');
 }
 
 /** Labels and pressed states for the mobile pause and mute controls. */
