@@ -5,7 +5,8 @@
  * and renders every frame via the canvas renderer.
  */
 
-import { createGameState, startGame, moveLeft, moveRight, softDrop, hardDrop, rotateCW, rotateCCW, tick, cycleSpell, castSelectedSpell } from '../src/engine/gameLoop';
+import { createGameState, startGame, moveLeft, moveRight, softDrop, tick } from '../src/engine/gameLoop';
+import { runGameAction } from '../src/input/gameActions';
 import { render } from '../src/render/canvasRenderer';
 import { playSound, toggleMute, isMuted } from '../src/audio/audioManager';
 import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio/musicManager';
@@ -191,6 +192,11 @@ function dismissScoreboard(): void {
 const keys = new Set<string>();
 let vKeyReleased = true; // release-based double-tap guard (§17)
 
+function runOneShotGameAction(action: Parameters<typeof runGameAction>[1]): void {
+  const result = runGameAction(state, action);
+  if (result.sound) playSound(result.sound);
+}
+
 document.addEventListener('keydown', (e) => {
   // Name entry: capture all keys
   if (nameEntryActive) {
@@ -219,43 +225,31 @@ document.addEventListener('keydown', (e) => {
   switch (e.code) {
     case 'Space':
       e.preventDefault();
-      if (hardDrop(state)) playSound('hard_drop');
+      runOneShotGameAction('HARD_DROP');
       break;
     case 'KeyV': {
       e.preventDefault();
       if (!vKeyReleased) break; // must release V before another cast
       vKeyReleased = false;
-      castSelectedSpell(state);
+      runOneShotGameAction('CAST_VEX');
       break;
     }
     case 'KeyC':
-      cycleSpell(state);
+      runOneShotGameAction('CYCLE_VEX');
       break;
     case 'KeyP':
-      if (state.status === 'PLAYING') {
-        state.status = 'PAUSED';
-        playSound('pause');
-      } else if (state.status === 'PAUSED') {
-        state.status = 'PLAYING';
-        playSound('resume');
-      }
+      runOneShotGameAction('TOGGLE_PAUSE');
       break;
     case 'ArrowUp':
       e.preventDefault();
-      if (rotateCW(state)) playSound('rotate');
+      runOneShotGameAction('ROTATE_CW');
       break;
     case 'KeyZ':
       e.preventDefault();
-      if (rotateCCW(state)) playSound('rotate');
+      runOneShotGameAction('ROTATE_CCW');
       break;
     case 'Escape':
-      if (state.status === 'PLAYING') {
-        state.status = 'PAUSED';
-        playSound('pause');
-      } else if (state.status === 'PAUSED') {
-        state.status = 'PLAYING';
-        playSound('resume');
-      }
+      runOneShotGameAction('TOGGLE_PAUSE');
       break;
     case 'KeyM':
       toggleMute();
