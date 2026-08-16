@@ -14,7 +14,7 @@ import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio
 import { saveScore, loadScores, isHighScore } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 import { getVisibleFillPercent } from '../src/engine/board';
-import { shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
+import { getMobileControlPresentation, shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -25,6 +25,8 @@ const introOverlay = document.getElementById('intro-overlay')!;
 const instructionsOverlay = document.getElementById('instructions-overlay')!;
 const scoreboardOverlay = document.getElementById('scoreboard-overlay')!;
 const nameEntryOverlay = document.getElementById('name-entry-overlay')!;
+const mobilePauseButton = document.getElementById('mobile-pause') as HTMLButtonElement;
+const mobileMuteButton = document.getElementById('mobile-mute') as HTMLButtonElement;
 
 const gameCtx = gameCanvas.getContext('2d')!;
 const nextCtx = nextCanvas.getContext('2d')!;
@@ -258,8 +260,7 @@ document.addEventListener('keydown', (e) => {
       runOneShotGameAction('TOGGLE_PAUSE');
       break;
     case 'KeyM':
-      toggleMute();
-      setMusicMuted(isMuted());
+      toggleAudioMute();
       break;
   }
 });
@@ -282,6 +283,21 @@ function updateMobileGameplayPresentation(): void {
     'is-mobile-gameplay',
     shouldUseMobileGameplayPresentation(state.status, coarsePortraitQuery.matches),
   );
+  updateMobileControlPresentation();
+}
+
+function updateMobileControlPresentation(): void {
+  const controls = getMobileControlPresentation(state.status, isMuted());
+  mobilePauseButton.textContent = controls.pause.label;
+  mobilePauseButton.setAttribute('aria-pressed', String(controls.pause.pressed));
+  mobileMuteButton.textContent = controls.mute.label;
+  mobileMuteButton.setAttribute('aria-pressed', String(controls.mute.pressed));
+}
+
+function toggleAudioMute(): void {
+  toggleMute();
+  setMusicMuted(isMuted());
+  updateMobileControlPresentation();
 }
 
 coarsePortraitQuery.addEventListener('change', updateMobileGameplayPresentation);

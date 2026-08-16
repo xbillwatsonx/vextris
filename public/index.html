@@ -462,8 +462,7 @@
 
     /* ─── Mobile portrait touch layout (active gameplay only) ─── */
     body:not(.is-mobile-gameplay) #mobile-hud,
-    body:not(.is-mobile-gameplay) #touch-dock,
-    body:not(.is-mobile-gameplay) .touch-controls-note {
+    body:not(.is-mobile-gameplay) #touch-dock {
       display: none;
     }
     @media (pointer: coarse) and (orientation: portrait) {
@@ -571,7 +570,7 @@
         box-shadow: 0 0 10px rgba(47, 231, 255, 0.35);
         outline: none;
       }
-      body.is-mobile-gameplay .touch-controls-note {
+      .touch-controls-note {
         display: block;
         color: #8E7BB6;
         font-size: 0.8rem;
