@@ -369,7 +369,7 @@
       max-width: 360px;
     }
     .name-key {
-      min-height: 42px;
+      min-height: 48px;
       border: 1px solid #6E2BFF;
       border-radius: 6px;
       background: #140B24;
@@ -390,7 +390,7 @@
       .name-entry-inner .subtitle { margin-bottom: 12px; }
       .name-slots { margin-bottom: 12px; }
       .name-slot { width: 48px; height: 56px; font-size: 1.8rem; }
-      .name-key { min-height: 36px; }
+      .name-key { font-size: 0.78rem; }
     }
     #game-canvas {
       border: 1px solid #6E2BFF;
@@ -493,6 +493,9 @@
         max-width: 320px;
       }
     }
+
+    /* Touch guidance is only relevant on coarse-pointer portrait devices. */
+    .touch-controls-note { display: none; }
 
     /* ─── Mobile portrait touch layout (active gameplay only) ─── */
     body:not(.is-mobile-gameplay) #mobile-hud,
