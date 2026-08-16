@@ -46,8 +46,10 @@ export function runGameAction(state: GameState, action: GameAction): GameActionR
       cycleSpell(state);
       return { didChange: state.selectedSpellIndex !== selectedSpellIndex };
     }
-    case 'CAST_VEX':
-      return { didChange: castSelectedSpell(state).ok };
+    case 'CAST_VEX': {
+      const result = castSelectedSpell(state);
+      return { didChange: result.ok || result.reason === 'game_over' };
+    }
     case 'TOGGLE_PAUSE':
       if (state.status === 'PLAYING') {
         state.status = 'PAUSED';

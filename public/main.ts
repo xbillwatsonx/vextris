@@ -7,6 +7,7 @@
 
 import { createGameState, startGame, moveLeft, moveRight, softDrop, tick } from '../src/engine/gameLoop';
 import { runGameAction } from '../src/input/gameActions';
+import type { GameAction } from '../src/input/gameActions';
 import { render } from '../src/render/canvasRenderer';
 import { playSound, toggleMute, isMuted } from '../src/audio/audioManager';
 import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio/musicManager';
@@ -192,7 +193,7 @@ function dismissScoreboard(): void {
 const keys = new Set<string>();
 let vKeyReleased = true; // release-based double-tap guard (§17)
 
-function runOneShotGameAction(action: Parameters<typeof runGameAction>[1]): void {
+function runOneShotGameAction(action: GameAction): void {
   const result = runGameAction(state, action);
   if (result.sound) playSound(result.sound);
 }
