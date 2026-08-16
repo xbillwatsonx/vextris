@@ -439,44 +439,79 @@
       opacity: 0.35;
     }
 
-    /* ─── Mobile portrait touch layout ─────────────────────────── */
-    #mobile-hud,
-    #touch-dock,
-    .touch-controls-note {
+    /* ─── Narrow desktop layout ───────────────────────────────── */
+    @media (max-width: 560px) {
+      body:not(.is-mobile-gameplay) {
+        overflow-y: auto;
+        min-height: auto;
+      }
+      body:not(.is-mobile-gameplay) #game-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      body:not(.is-mobile-gameplay) #game-canvas {
+        max-width: 100%;
+        height: auto;
+      }
+      body:not(.is-mobile-gameplay) #side-panel {
+        min-width: unset;
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+
+    /* ─── Mobile portrait touch layout (active gameplay only) ─── */
+    body:not(.is-mobile-gameplay) #mobile-hud,
+    body:not(.is-mobile-gameplay) #touch-dock,
+    body:not(.is-mobile-gameplay) .touch-controls-note {
       display: none;
     }
     @media (pointer: coarse) and (orientation: portrait) {
-      body {
+      body.is-mobile-gameplay {
+        --mobile-layout-gap: 8px;
+        --mobile-control-gap: 6px;
+        --mobile-hud-height: 48px;
+        --mobile-dock-row-height: 48px;
+        --mobile-dock-height: calc(
+          var(--mobile-dock-row-height) + var(--mobile-dock-row-height) + var(--mobile-control-gap)
+        );
+        --mobile-layout-gaps-height: calc(var(--mobile-layout-gap) + var(--mobile-layout-gap));
+        --mobile-safe-top: max(8px, env(safe-area-inset-top));
+        --mobile-safe-right: max(8px, env(safe-area-inset-right));
+        --mobile-safe-bottom: max(8px, env(safe-area-inset-bottom));
+        --mobile-safe-left: max(8px, env(safe-area-inset-left));
+        --mobile-noncanvas-height: calc(
+          var(--mobile-safe-top) + var(--mobile-safe-bottom) + var(--mobile-hud-height) +
+          var(--mobile-dock-height) + var(--mobile-layout-gaps-height)
+        );
+        /* At 375×667 with zero insets: 8 + 8 + 48 + 48 + 48 + 6 + 8 + 8 = 182px, leaving 485px for the canvas. */
         height: 100dvh;
         min-height: 100dvh;
         overflow: hidden;
         justify-content: flex-start;
-        gap: 8px;
-        padding:
-          max(8px, env(safe-area-inset-top))
-          max(8px, env(safe-area-inset-right))
-          max(8px, env(safe-area-inset-bottom))
-          max(8px, env(safe-area-inset-left));
+        gap: var(--mobile-layout-gap);
+        padding: var(--mobile-safe-top) var(--mobile-safe-right) var(--mobile-safe-bottom) var(--mobile-safe-left);
       }
-      #logo-container,
-      #side-panel {
+      body.is-mobile-gameplay #logo-container,
+      body.is-mobile-gameplay #side-panel {
         display: none;
       }
-      #mobile-hud {
+      body.is-mobile-gameplay #mobile-hud {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
         align-items: center;
-        gap: 6px;
+        gap: var(--mobile-control-gap);
         width: min(100%, 420px);
+        min-height: var(--mobile-hud-height);
         font-size: 0.72rem;
       }
-      .mobile-stat {
+      body.is-mobile-gameplay .mobile-stat {
         min-width: 0;
         color: #8E7BB6;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
-      .mobile-stat output {
+      body.is-mobile-gameplay .mobile-stat output {
         display: block;
         overflow: hidden;
         color: #F5B83D;
@@ -485,9 +520,9 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .mobile-hud-button,
-      .touch-control {
-        min-height: 48px;
+      body.is-mobile-gameplay .mobile-hud-button,
+      body.is-mobile-gameplay .touch-control {
+        min-height: var(--mobile-dock-row-height);
         border: 1px solid #6E2BFF;
         border-radius: 6px;
         background: #140B24;
@@ -495,10 +530,10 @@
         font: inherit;
         touch-action: manipulation;
       }
-      .mobile-hud-button {
+      body.is-mobile-gameplay .mobile-hud-button {
         padding: 0 10px;
       }
-      #game-container {
+      body.is-mobile-gameplay #game-container {
         display: flex;
         flex: 1 1 auto;
         min-height: 0;
@@ -507,36 +542,36 @@
         align-items: center;
         justify-content: center;
       }
-      #game-canvas {
+      body.is-mobile-gameplay #game-canvas {
         width: auto;
         height: auto;
         max-width: 100%;
-        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 176px);
+        max-height: calc(100dvh - var(--mobile-noncanvas-height));
         aspect-ratio: 1 / 2;
       }
-      #touch-dock {
+      body.is-mobile-gameplay #touch-dock {
         display: grid;
-        gap: 6px;
+        gap: var(--mobile-control-gap);
         width: min(100%, 420px);
       }
-      .touch-row {
+      body.is-mobile-gameplay .touch-row {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 6px;
+        gap: var(--mobile-control-gap);
       }
-      .touch-control {
+      body.is-mobile-gameplay .touch-control {
         padding: 6px 4px;
         font-size: 0.78rem;
         font-weight: 700;
       }
-      .touch-control:active,
-      .touch-control:focus-visible,
-      .mobile-hud-button:focus-visible {
+      body.is-mobile-gameplay .touch-control:active,
+      body.is-mobile-gameplay .touch-control:focus-visible,
+      body.is-mobile-gameplay .mobile-hud-button:focus-visible {
         border-color: #2FE7FF;
         box-shadow: 0 0 10px rgba(47, 231, 255, 0.35);
         outline: none;
       }
-      .touch-controls-note {
+      body.is-mobile-gameplay .touch-controls-note {
         display: block;
         color: #8E7BB6;
         font-size: 0.8rem;

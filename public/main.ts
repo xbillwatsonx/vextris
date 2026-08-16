@@ -14,6 +14,7 @@ import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio
 import { saveScore, loadScores, isHighScore } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 import { getVisibleFillPercent } from '../src/engine/board';
+import { shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -45,11 +46,13 @@ function advanceIntro(): void {
     introPhase = 'instructions';
     introOverlay.classList.add('hidden');
     instructionsOverlay.classList.remove('hidden');
+    updateMobileGameplayPresentation();
   } else {
     // Start game
     introPhase = 'done';
     instructionsOverlay.classList.add('hidden');
     startGame(state);
+    updateMobileGameplayPresentation();
     playSound('resume');
     // Start background music (user gesture has occurred)
     startMusic();
@@ -64,6 +67,7 @@ let savedDate = '';
 function showScoreboard(): void {
   if (scoreboardShown) return;
   scoreboardShown = true;
+  updateMobileGameplayPresentation();
 
   savedDate = new Date().toISOString();
 
@@ -196,6 +200,7 @@ let vKeyReleased = true; // release-based double-tap guard (§17)
 function runOneShotGameAction(action: GameAction): void {
   const result = runGameAction(state, action);
   if (result.sound) playSound(result.sound);
+  updateMobileGameplayPresentation();
 }
 
 document.addEventListener('keydown', (e) => {
@@ -270,12 +275,23 @@ document.addEventListener('keyup', (e) => {
 
 const seed = 'VEXTRIS-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 const state = createGameState(seed);
+const coarsePortraitQuery = window.matchMedia('(pointer: coarse) and (orientation: portrait)');
+
+function updateMobileGameplayPresentation(): void {
+  document.body.classList.toggle(
+    'is-mobile-gameplay',
+    shouldUseMobileGameplayPresentation(state.status, coarsePortraitQuery.matches),
+  );
+}
+
+coarsePortraitQuery.addEventListener('change', updateMobileGameplayPresentation);
 
 function restartGame(): void {
   const newSeed = 'VEXTRIS-' + Math.random().toString(36).slice(2, 8).toUpperCase();
   const newState = createGameState(newSeed);
   Object.assign(state, newState);
   startGame(state);
+  updateMobileGameplayPresentation();
   playSound('resume');
   // Reset music for new game
   resetMusic();
@@ -303,6 +319,7 @@ function gameLoop(now: number): void {
     // Handle held keys (DAS/ARR for left/right, soft drop)
     handleHeldKeys(deltaMs);
   }
+  updateMobileGameplayPresentation();
 
   // Detect game over — show scoreboard once
   if (state.status === 'GAME_OVER' && !scoreboardShown) {
@@ -388,5 +405,6 @@ instructionsOverlay.addEventListener('click', advanceIntro);
 scoreboardOverlay.addEventListener('click', dismissScoreboard);
 
 console.log(`Vextris loaded. Seed: ${state.rngSeed}`);
+updateMobileGameplayPresentation();
 lastFrame = performance.now();
 requestAnimationFrame(gameLoop);
