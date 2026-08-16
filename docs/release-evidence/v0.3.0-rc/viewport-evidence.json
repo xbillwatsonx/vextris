@@ -1,0 +1,198 @@
+[
+  {
+    "viewport": "375x667-safe",
+    "safeAreaInsets": {
+      "top": 24,
+      "bottom": 20,
+      "left": 0,
+      "right": 0
+    },
+    "screenshot": "docs/release-evidence/v0.3.0-rc/375x667-safe.png",
+    "visualViewport": {
+      "width": 375,
+      "height": 667,
+      "offsetTop": 0,
+      "offsetLeft": 0
+    },
+    "bodyClass": "is-mobile-gameplay",
+    "scrollHeight": 667,
+    "clientHeight": 667,
+    "scrollable": false,
+    "board": {
+      "x": 73.3,
+      "y": 80,
+      "width": 228.5,
+      "height": 457,
+      "bottom": 537,
+      "display": "block"
+    },
+    "hud": {
+      "x": 8,
+      "y": 24,
+      "width": 359,
+      "height": 48,
+      "bottom": 72,
+      "display": "grid"
+    },
+    "dock": {
+      "x": 8,
+      "y": 545,
+      "width": 359,
+      "height": 102,
+      "bottom": 647,
+      "display": "grid"
+    },
+    "fit": {
+      "board": true,
+      "hud": true,
+      "dock": true
+    }
+  },
+  {
+    "viewport": "390x740",
+    "safeAreaInsets": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "screenshot": "docs/release-evidence/v0.3.0-rc/390x740.png",
+    "visualViewport": {
+      "width": 390,
+      "height": 740,
+      "offsetTop": 0,
+      "offsetLeft": 0
+    },
+    "bodyClass": "is-mobile-gameplay",
+    "scrollHeight": 740,
+    "clientHeight": 740,
+    "scrollable": false,
+    "board": {
+      "x": 55.5,
+      "y": 64,
+      "width": 279,
+      "height": 558,
+      "bottom": 622,
+      "display": "block"
+    },
+    "hud": {
+      "x": 8,
+      "y": 8,
+      "width": 374,
+      "height": 48,
+      "bottom": 56,
+      "display": "grid"
+    },
+    "dock": {
+      "x": 8,
+      "y": 630,
+      "width": 374,
+      "height": 102,
+      "bottom": 732,
+      "display": "grid"
+    },
+    "fit": {
+      "board": true,
+      "hud": true,
+      "dock": true
+    }
+  },
+  {
+    "viewport": "390x812",
+    "safeAreaInsets": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "screenshot": "docs/release-evidence/v0.3.0-rc/390x812.png",
+    "visualViewport": {
+      "width": 390,
+      "height": 812,
+      "offsetTop": 0,
+      "offsetLeft": 0
+    },
+    "bodyClass": "is-mobile-gameplay",
+    "scrollHeight": 812,
+    "clientHeight": 812,
+    "scrollable": false,
+    "board": {
+      "x": 37.5,
+      "y": 64,
+      "width": 315,
+      "height": 630,
+      "bottom": 694,
+      "display": "block"
+    },
+    "hud": {
+      "x": 8,
+      "y": 8,
+      "width": 374,
+      "height": 48,
+      "bottom": 56,
+      "display": "grid"
+    },
+    "dock": {
+      "x": 8,
+      "y": 702,
+      "width": 374,
+      "height": 102,
+      "bottom": 804,
+      "display": "grid"
+    },
+    "fit": {
+      "board": true,
+      "hud": true,
+      "dock": true
+    }
+  },
+  {
+    "viewport": "390x844",
+    "safeAreaInsets": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "screenshot": "docs/release-evidence/v0.3.0-rc/390x844.png",
+    "visualViewport": {
+      "width": 390,
+      "height": 844,
+      "offsetTop": 0,
+      "offsetLeft": 0
+    },
+    "bodyClass": "is-mobile-gameplay",
+    "scrollHeight": 844,
+    "clientHeight": 844,
+    "scrollable": false,
+    "board": {
+      "x": 34,
+      "y": 73,
+      "width": 322,
+      "height": 644,
+      "bottom": 717,
+      "display": "block"
+    },
+    "hud": {
+      "x": 8,
+      "y": 8,
+      "width": 374,
+      "height": 48,
+      "bottom": 56,
+      "display": "grid"
+    },
+    "dock": {
+      "x": 8,
+      "y": 734,
+      "width": 374,
+      "height": 102,
+      "bottom": 836,
+      "display": "grid"
+    },
+    "fit": {
+      "board": true,
+      "hud": true,
+      "dock": true
+    }
+  }
+]
