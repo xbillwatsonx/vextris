@@ -17,6 +17,8 @@ import { getVisibleFillPercent } from '../src/engine/board';
 import { getMobileControlPresentation, shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
 import { PointerHeldInputs } from '../src/input/heldInputs';
 import type { HeldKey } from '../src/input/heldInputs';
+import { createNameEntry, transitionNameEntry } from '../src/input/nameEntry';
+import { wireTouchControls } from '../src/input/touchControls';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -129,13 +131,11 @@ function renderScoreboard(): void {
 // ─── Name Entry ─────────────────────────────────────────────────
 
 let nameEntryActive = false;
-let nameChars: string[] = ['', '', ''];
-let nameCursor = 0;
+let nameEntry = createNameEntry();
 
 function startNameEntry(): void {
   nameEntryActive = true;
-  nameChars = ['', '', ''];
-  nameCursor = 0;
+  nameEntry = createNameEntry();
   updateNameSlots();
   nameEntryOverlay.classList.remove('hidden');
 }
@@ -144,22 +144,21 @@ function updateNameSlots(): void {
   for (let i = 0; i < 3; i++) {
     const slot = document.getElementById(`name-slot-${i}`);
     if (!slot) continue;
-    slot.textContent = nameChars[i] || '';
+    slot.textContent = nameEntry.chars[i] || '';
     slot.className = 'name-slot';
-    if (i === nameCursor) slot.classList.add('active');
-    if (nameChars[i]) slot.classList.add('filled');
+    if (i === nameEntry.cursor) slot.classList.add('active');
+    if (nameEntry.chars[i]) slot.classList.add('filled');
   }
 }
 
 function handleNameKey(key: string): void {
-  if (key === 'Enter') {
-    // Confirm — use 'AAA' if all empty
-    const finalName = nameChars.every(c => c === '') ? 'AAA' : nameChars.join('');
+  const transition = transitionNameEntry(nameEntry, key);
+  nameEntry = transition.entry;
+  if (transition.confirmedName) {
     nameEntryActive = false;
     nameEntryOverlay.classList.add('hidden');
-
     saveScore({
-      name: finalName,
+      name: transition.confirmedName,
       score: state.score,
       level: state.level,
       lines: state.linesCleared,
@@ -168,26 +167,7 @@ function handleNameKey(key: string): void {
     renderScoreboard();
     return;
   }
-
-  if (key === 'Backspace') {
-    if (nameCursor > 0) {
-      nameCursor--;
-      nameChars[nameCursor] = '';
-    } else {
-      nameChars[0] = '';
-    }
-    updateNameSlots();
-    return;
-  }
-
-  // A-Z only
-  if (/^[A-Za-z]$/.test(key)) {
-    nameChars[nameCursor] = key.toUpperCase();
-    if (nameCursor < 2) {
-      nameCursor++;
-    }
-    updateNameSlots();
-  }
+  updateNameSlots();
 }
 
 function dismissScoreboard(): void {
@@ -307,69 +287,72 @@ function toggleAudioMute(): void {
 
 coarsePortraitQuery.addEventListener('change', updateMobileGameplayPresentation);
 
-function stopTouchButtonEvent(event: PointerEvent): void {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-function capturePointer(button: HTMLButtonElement, pointerId: number): void {
-  try {
-    button.setPointerCapture(pointerId);
-  } catch {
-    // A cancelled pointer can no longer be captured; cleanup remains safe.
-  }
-}
-
-function setPressed(button: HTMLButtonElement, pressed: boolean): void {
-  button.classList.toggle('is-pressed', pressed);
-}
-
-function releaseHeldPointer(event: PointerEvent, button: HTMLButtonElement): void {
-  stopTouchButtonEvent(event);
-  pointerHeldInputs.remove(event.pointerId);
-  setPressed(button, false);
-}
-
-function wireTouchControls(): void {
-  const actionButtons = document.querySelectorAll<HTMLButtonElement>('[data-action]');
-  for (const button of actionButtons) {
+function wireNameEntryKeypad(): void {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-name-key]')) {
+    const key = button.dataset.nameKey;
+    if (!key) continue;
+    let activePointer: number | null = null;
+    let suppressNextClick = false;
+    const stop = (event: PointerEvent): void => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
     button.addEventListener('pointerdown', (event) => {
-      stopTouchButtonEvent(event);
-      capturePointer(button, event.pointerId);
-      setPressed(button, true);
-      const action = button.dataset.action;
-      if (action === 'TOGGLE_MUTE') {
-        toggleAudioMute();
-      } else if (action) {
-        runOneShotGameAction(action as GameAction);
+      stop(event);
+      if (activePointer !== null) return;
+      activePointer = event.pointerId;
+      suppressNextClick = true;
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch {
+        // A cancelled pointer cannot be captured; pointer cleanup remains safe.
       }
+      handleNameKey(key);
     });
     for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
       button.addEventListener(eventName, (event) => {
-        stopTouchButtonEvent(event);
-        setPressed(button, false);
+        stop(event);
+        if (activePointer === event.pointerId) activePointer = null;
       });
     }
-  }
-
-  const heldButtons = document.querySelectorAll<HTMLButtonElement>('[data-held-key]');
-  for (const button of heldButtons) {
-    const key = button.dataset.heldKey as HeldKey;
-    button.addEventListener('pointerdown', (event) => {
-      stopTouchButtonEvent(event);
-      capturePointer(button, event.pointerId);
-      pointerHeldInputs.add(event.pointerId, key);
-      setPressed(button, true);
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
+      handleNameKey(key);
     });
-    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
-      button.addEventListener(eventName, (event) => releaseHeldPointer(event, button));
-    }
   }
 }
 
-window.addEventListener('blur', () => pointerHeldInputs.clear());
+function wireBrowserTouchControls() {
+  const actionButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-action]')]
+    .map((button) => ({ button, action: button.dataset.action }))
+    .filter((item): item is { button: HTMLButtonElement; action: GameAction | 'TOGGLE_MUTE' } =>
+      item.action !== undefined,
+    );
+  const heldButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-held-key]')]
+    .map((button) => ({ button, key: button.dataset.heldKey }))
+    .filter((item): item is { button: HTMLButtonElement; key: HeldKey } => item.key !== undefined);
+
+  return wireTouchControls({
+    actionButtons,
+    heldButtons,
+    heldInputs: pointerHeldInputs,
+    onAction: (action) => {
+      if (action === 'TOGGLE_MUTE') toggleAudioMute();
+      else runOneShotGameAction(action);
+    },
+  });
+}
+
+const browserTouchControls = wireBrowserTouchControls();
+
+window.addEventListener('blur', () => browserTouchControls.clearPressedInputs());
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') pointerHeldInputs.clear();
+  if (document.visibilityState === 'hidden') browserTouchControls.clearPressedInputs();
 });
 
 function restartGame(): void {
@@ -489,7 +472,7 @@ function handleHeldKeys(deltaMs: number): void {
 introOverlay.addEventListener('click', advanceIntro);
 instructionsOverlay.addEventListener('click', advanceIntro);
 scoreboardOverlay.addEventListener('click', dismissScoreboard);
-wireTouchControls();
+wireNameEntryKeypad();
 
 console.log(`Vextris loaded. Seed: ${state.rngSeed}`);
 updateMobileGameplayPresentation();

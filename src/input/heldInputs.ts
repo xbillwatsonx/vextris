@@ -20,7 +20,10 @@ export class PointerHeldInputs {
   }
 
   has(key: HeldKey): boolean {
-    return [...this.byPointer.values()].includes(key);
+    for (const heldKey of this.byPointer.values()) {
+      if (heldKey === key) return true;
+    }
+    return false;
   }
 
   isHeld(key: HeldKey, keyboardHeld: ReadonlySet<string>): boolean {
