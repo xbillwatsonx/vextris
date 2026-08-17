@@ -7,8 +7,9 @@
 #
 # Usage:
 #   ./scripts/release.sh              # patch bump (0.2.0 → 0.2.1)
-#   ./scripts/release.sh minor         # minor bump (0.2.0 → 0.3.0)
-#   ./scripts/release.sh major         # major bump (0.2.0 → 1.0.0)
+#   ./scripts/release.sh minor        # minor bump (0.2.0 → 0.3.0)
+#   ./scripts/release.sh major        # major bump (0.2.0 → 1.0.0)
+#   ./scripts/release.sh --current    # release the version already in package.json
 #   ./scripts/release.sh --notes "Custom release notes here"
 #
 # Requires: git, gh CLI (authenticated), jq
@@ -34,19 +35,21 @@ done
 
 BUMP_TYPE="patch"
 CUSTOM_NOTES=""
+RELEASE_CURRENT=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     patch)  BUMP_TYPE="patch" ;;
     minor)  BUMP_TYPE="minor" ;;
     major)  BUMP_TYPE="major" ;;
+    --current) RELEASE_CURRENT=true ;;
     --notes)
       shift
       CUSTOM_NOTES="$1"
       ;;
     *)
       echo "Unknown argument: $1"
-      echo "Usage: ./scripts/release.sh [patch|minor|major] [--notes \"custom notes\"]"
+      echo "Usage: ./scripts/release.sh [patch|minor|major|--current] [--notes \"custom notes\"]"
       exit 1
       ;;
   esac
@@ -93,19 +96,41 @@ MAJOR="${PARTS[0]}"
 MINOR="${PARTS[1]}"
 PATCH="${PARTS[2]}"
 
-case "$BUMP_TYPE" in
-  patch) PATCH=$((PATCH + 1)) ;;
-  minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-  major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-esac
-
-NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+if [[ "$RELEASE_CURRENT" == true ]]; then
+  NEW_VERSION="$CURRENT_VERSION"
+else
+  case "$BUMP_TYPE" in
+    patch) PATCH=$((PATCH + 1)) ;;
+    minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+    major) MAJOR=$((MAJOR + 1)); MINOR=0 ;;
+  esac
+  NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+fi
 TAG="v${NEW_VERSION}"
+
+if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+  echo "ERROR: Tag $TAG already exists locally."
+  exit 1
+fi
+
+# --current must never recreate a release that was tagged or published from
+# another checkout. Local tag existence alone cannot prove that safety.
+if [[ "$RELEASE_CURRENT" == true ]]; then
+  if git ls-remote --exit-code --tags origin "refs/tags/$TAG" "refs/tags/$TAG^{}" >/dev/null 2>&1; then
+    echo "ERROR: Tag $TAG already exists on origin."
+    exit 1
+  fi
+
+  if gh release view "$TAG" >/dev/null 2>&1; then
+    echo "ERROR: GitHub Release $TAG already exists."
+    exit 1
+  fi
+fi
 
 echo "─── Vextris Release ───"
 echo "  Current: v${CURRENT_VERSION}"
 echo "  New:     v${NEW_VERSION}"
-echo "  Bump:    ${BUMP_TYPE}"
+echo "  Mode:    $([[ "$RELEASE_CURRENT" == true ]] && echo current || echo "$BUMP_TYPE bump")"
 echo ""
 
 # ─── Generate Release Notes ──────────────────────────────────
@@ -193,26 +218,35 @@ fi
 # ─── Execute ─────────────────────────────────────────────────
 
 echo ""
-echo "1/6 Bumping package.json version..."
-jq --arg v "$NEW_VERSION" '.version = $v' package.json > package.json.tmp && mv package.json.tmp package.json
+if [[ "$RELEASE_CURRENT" == true ]]; then
+  LOCK_VERSION=$(jq -r '.version' package-lock.json)
+  if [[ "$LOCK_VERSION" != "$CURRENT_VERSION" ]]; then
+    echo "ERROR: package-lock.json version ($LOCK_VERSION) does not match package.json ($CURRENT_VERSION)."
+    exit 1
+  fi
+  echo "1/4 Releasing existing version ${NEW_VERSION}; no version-bump commit needed."
+else
+  echo "1/5 Bumping package.json and package-lock.json..."
+  npm version "$NEW_VERSION" --no-git-tag-version
 
-echo "2/6 Committing version bump..."
-git add package.json
-git commit -m "chore: bump version to ${NEW_VERSION}"
+  echo "2/5 Committing version bump..."
+  git add package.json package-lock.json
+  git commit -m "chore: bump version to ${NEW_VERSION}"
+fi
 
-echo "3/6 Creating tag ${TAG}..."
+echo "Creating tag ${TAG}..."
 git tag -a "$TAG" -m "Vextris ${TAG}"
 
-echo "4/6 Pushing to GitHub..."
+echo "Pushing to GitHub..."
 git push
 git push --tags
 
-echo "5/6 Creating GitHub Release..."
+echo "Creating GitHub Release..."
 gh release create "$TAG" \
   --title "Vextris ${TAG}" \
   --notes "$RELEASE_NOTES"
 
-echo "6/6 Done!"
+echo "Done!"
 echo ""
 echo "✅ Released Vextris ${TAG}"
 echo "   https://github.com/xbillwatsonx/vextris/releases/tag/${TAG}"
