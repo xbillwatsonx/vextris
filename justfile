@@ -143,7 +143,7 @@ release-preflight:
     @test -z "$(git status --porcelain)"
     @git fetch origin master
     @test "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)"
-    @test "$(node -p \"require('./package.json').version\")" = "$(node -p \"require('./package-lock.json').version\")"
+    @test "$(node -p 'require("package.json").version')" = "$(node -p 'require("package-lock.json").version')"
     @npm test
     @npm run lint
     @npm run build
