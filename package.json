@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build && cp -r public/music dist/music",
     "check:pages-base": "node scripts/check-pages-base.mjs",
+    "check:pages-music": "node scripts/check-pages-music.mjs",
+    "verify:pages-music": "node scripts/verify-live-pages-music.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
