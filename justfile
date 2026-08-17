@@ -135,3 +135,18 @@ nuke:
 [group('deploy')]
 deploy: build
     @npx -y gh-pages -d dist -m "deploy: $(git log -1 --format='%h %s')"
+
+# Verify the merged release candidate without creating a tag, release, or deployment
+[group('deploy')]
+release-preflight:
+    @test "$(git branch --show-current)" = "master"
+    @test -z "$(git status --porcelain)"
+    @git fetch origin master
+    @test "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)"
+    @test "$(node -p \"require('./package.json').version\")" = "$(node -p \"require('./package-lock.json').version\")"
+    @npm test
+    @npm run lint
+    @npm run build
+    @test "$(find dist/music -maxdepth 1 -type f -name '*.ogg' | wc -l)" -eq 9
+    @git diff --check
+    @echo "Release preflight passed — no tag, GitHub Release, or deployment was created."
