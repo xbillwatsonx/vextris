@@ -149,5 +149,5 @@ release-preflight:
     @npm run build
     @npm run check:pages-base
     @test "$(find dist/music -maxdepth 1 -type f -name '*.ogg' | wc -l)" -eq 9
-    @git diff --check v0.2.0...HEAD
+    @git diff --check "$(git describe --tags --abbrev=0 HEAD)...HEAD"
     @echo "Release preflight passed — no tag, GitHub Release, or deployment was created."
