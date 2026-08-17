@@ -111,7 +111,7 @@ Vextris uses TypeScript, Vite, Vitest, Canvas, and Web Audio. There are no runti
 
 ## License
 
-No license has been selected yet. A license decision is separate from the v0.3.0 release and does not block it.
+Licensed under the [MIT License](LICENSE). © 2026 Bill Watson.
 
 ---
 
