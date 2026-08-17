@@ -16,12 +16,13 @@ const pollIntervalMs = 10_000;
 const timeoutMs = 120_000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function checkTracks() {
+async function checkTracks(cacheBust) {
   return Promise.all(tracks.map(async (track) => {
-    const url = new URL(`music/${track}`, baseUrl).toString();
+    const url = new URL(`music/${track}`, baseUrl);
+    url.searchParams.set('verify', cacheBust);
     try {
-      const response = await fetch(url, { redirect: 'follow' });
-      return { track, url, status: response.status, ok: response.ok };
+      const response = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+      return { track, url: url.toString(), status: response.status, ok: response.ok };
     } catch (error) {
       return { track, url, status: `ERROR: ${error instanceof Error ? error.message : String(error)}`, ok: false };
     }
@@ -37,7 +38,8 @@ while (true) {
   const elapsedMs = Date.now() - startedAt;
   console.log(`Live Pages music check attempt ${attempt} (${Math.floor(elapsedMs / 1000)}s elapsed).`);
 
-  const results = await checkTracks();
+  const cacheBust = `${attempt}-${Date.now()}`;
+  const results = await checkTracks(cacheBust);
   for (const result of results) {
     console.log(`${result.status} ${result.url}`);
   }
