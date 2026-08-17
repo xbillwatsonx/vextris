@@ -303,8 +303,10 @@
       background: rgba(0, 0, 0, 0.92);
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
+      overflow-y: auto;
+      padding: max(20px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
       z-index: 1000;
     }
     #name-entry-overlay.hidden {
@@ -314,6 +316,7 @@
       text-align: center;
       max-width: 400px;
       width: 100%;
+      margin: auto 0;
     }
     .name-entry-inner h1 {
       font-size: 1.6rem;
@@ -357,6 +360,41 @@
       color: #8E7BB6;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
+    }
+    .name-keypad {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      margin: 0 auto 14px;
+      max-width: 360px;
+    }
+    .name-key {
+      min-height: 48px;
+      border: 1px solid #6E2BFF;
+      border-radius: 6px;
+      background: #140B24;
+      color: #F3EEFF;
+      font: 700 0.85rem/1 system-ui, sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .name-key.wide { grid-column: span 3; }
+    .name-key.confirm { grid-column: span 4; border-color: #2FE7FF; }
+    .name-key:active,
+    .name-key:focus-visible {
+      border-color: #F5B83D;
+      box-shadow: 0 0 10px rgba(245, 184, 61, 0.35);
+      outline: none;
+    }
+    @media (max-height: 600px) {
+      .name-entry-inner h1 { font-size: 1.25rem; }
+      .name-entry-inner .subtitle { margin-bottom: 12px; }
+      .name-slots { margin-bottom: 12px; }
+      .name-slot { width: 48px; height: 56px; font-size: 1.8rem; }
+      .name-key { font-size: 0.78rem; }
     }
     #game-canvas {
       border: 1px solid #6E2BFF;
@@ -439,28 +477,171 @@
       opacity: 0.35;
     }
 
-    /* ─── Responsive: small screens ─────────────────────────── */
+    /* ─── Narrow desktop layout ───────────────────────────────── */
     @media (max-width: 560px) {
-      body {
+      body:not(.is-mobile-gameplay) {
         overflow-y: auto;
         min-height: auto;
       }
-      #game-container {
+      body:not(.is-mobile-gameplay) #game-container {
         flex-direction: column;
         gap: 12px;
       }
-      #game-canvas {
+      body:not(.is-mobile-gameplay) #game-canvas {
         max-width: 100%;
         height: auto;
       }
-      #side-panel {
+      body:not(.is-mobile-gameplay) #side-panel {
         min-width: unset;
         width: 100%;
         max-width: 320px;
       }
     }
+
+    /* Touch guidance is only relevant on coarse-pointer portrait devices. */
+    .touch-controls-note { display: none; }
+    .mobile-instructions { display: none; }
+
+    /* ─── Mobile portrait touch layout (active gameplay only) ─── */
+    body:not(.is-mobile-gameplay) #mobile-hud,
+    body:not(.is-mobile-gameplay) #touch-dock {
+      display: none;
+    }
+    @media (pointer: coarse) and (orientation: portrait) {
+      body.is-mobile-gameplay {
+        --mobile-layout-gap: 8px;
+        --mobile-control-gap: 6px;
+        --mobile-hud-height: 48px;
+        --mobile-dock-row-height: 48px;
+        --mobile-dock-height: calc(
+          var(--mobile-dock-row-height) + var(--mobile-dock-row-height) + var(--mobile-control-gap)
+        );
+        --mobile-layout-gaps-height: calc(var(--mobile-layout-gap) + var(--mobile-layout-gap));
+        --mobile-safe-top: max(8px, env(safe-area-inset-top));
+        --mobile-safe-right: max(8px, env(safe-area-inset-right));
+        --mobile-safe-bottom: max(8px, env(safe-area-inset-bottom));
+        --mobile-safe-left: max(8px, env(safe-area-inset-left));
+        --mobile-noncanvas-height: calc(
+          var(--mobile-safe-top) + var(--mobile-safe-bottom) + var(--mobile-hud-height) +
+          var(--mobile-dock-height) + var(--mobile-layout-gaps-height)
+        );
+        /* At 375×667 with zero insets: 8 + 8 + 48 + 48 + 48 + 6 + 8 + 8 = 182px, leaving 485px for the canvas. */
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+        justify-content: flex-start;
+        gap: var(--mobile-layout-gap);
+        padding: var(--mobile-safe-top) var(--mobile-safe-right) var(--mobile-safe-bottom) var(--mobile-safe-left);
+      }
+      body.is-mobile-gameplay #logo-container,
+      body.is-mobile-gameplay #side-panel {
+        display: none;
+      }
+      body.is-mobile-gameplay #mobile-hud {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
+        align-items: center;
+        gap: var(--mobile-control-gap);
+        width: min(100%, 420px);
+        min-height: var(--mobile-hud-height);
+        font-size: 0.72rem;
+      }
+      body.is-mobile-gameplay .mobile-stat {
+        min-width: 0;
+        color: #8E7BB6;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      body.is-mobile-gameplay .mobile-stat output {
+        display: block;
+        overflow: hidden;
+        color: #F5B83D;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      body.is-mobile-gameplay .mobile-hud-button,
+      body.is-mobile-gameplay .touch-control {
+        min-height: var(--mobile-dock-row-height);
+        border: 1px solid #6E2BFF;
+        border-radius: 6px;
+        background: #140B24;
+        color: #F3EEFF;
+        font: inherit;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body.is-mobile-gameplay .mobile-hud-button {
+        padding: 0 10px;
+      }
+      body.is-mobile-gameplay #game-container {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        max-width: 420px;
+        align-items: center;
+        justify-content: center;
+      }
+      body.is-mobile-gameplay #game-canvas {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: calc(100dvh - var(--mobile-noncanvas-height));
+        aspect-ratio: 1 / 2;
+      }
+      body.is-mobile-gameplay #touch-dock {
+        display: grid;
+        gap: var(--mobile-control-gap);
+        width: min(100%, 420px);
+      }
+      body.is-mobile-gameplay .touch-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--mobile-control-gap);
+      }
+      body.is-mobile-gameplay .touch-control {
+        padding: 6px 4px;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      body.is-mobile-gameplay .touch-control:active,
+      body.is-mobile-gameplay .touch-control.is-pressed,
+      body.is-mobile-gameplay .touch-control:focus-visible,
+      body.is-mobile-gameplay .mobile-hud-button.is-pressed,
+      body.is-mobile-gameplay .mobile-hud-button:focus-visible {
+        border-color: #2FE7FF;
+        box-shadow: 0 0 10px rgba(47, 231, 255, 0.35);
+        outline: none;
+      }
+      .touch-controls-note {
+        display: block;
+        color: #8E7BB6;
+        font-size: 0.8rem;
+        margin-top: 10px;
+      }
+      .desktop-instructions { display: none; }
+      .mobile-instructions { display: block; }
+      .mobile-instructions .touch-guide {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .mobile-instructions .touch-guide div {
+        background: #140B24;
+        border: 1px solid #24113D;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 0.8rem;
+      }
+      .mobile-instructions strong { color: #F3EEFF; }
+    }
   </style>
-  <script type="module" crossorigin src="/assets/index-BMQXJT6V.js"></script>
+  <script type="module" crossorigin src="/assets/index-CAOlJsP1.js"></script>
 </head>
 <body>
   <div id="logo-container">
@@ -473,11 +654,20 @@
     <div class="prompt">Press any key to continue</div>
   </div>
 
+  <section id="mobile-hud" aria-label="Game status">
+    <div class="mobile-stat">Score<output id="mobile-score">0</output></div>
+    <div class="mobile-stat">Level<output id="mobile-level">1</output></div>
+    <div class="mobile-stat">Spell<output id="mobile-selected-spell">No vex</output></div>
+    <button id="mobile-pause" class="mobile-hud-button" type="button" data-action="TOGGLE_PAUSE" aria-label="Pause" aria-pressed="false">Pause</button>
+    <button id="mobile-mute" class="mobile-hud-button" type="button" data-action="TOGGLE_MUTE" aria-label="Mute" aria-pressed="false">Mute</button>
+  </section>
+
   <!-- Instructions overlay: spells + controls + "Press any key to begin" -->
   <div id="instructions-overlay" class="hidden">
     <div class="instructions-inner">
       <h1>VEXTRIS</h1>
 
+      <div class="desktop-instructions">
       <p class="tagline">Vextris is a classic falling-block game with magic spells.</p>
 
       <p class="hook">Vex glyphs <span style="color:#8B3FCF">✦</span> appear on random blocks as they fall.
@@ -526,12 +716,39 @@
           <div><span>Pause</span><span>P / Esc</span></div>
           <div><span>Mute</span><span>M</span></div>
         </div>
+        <p class="touch-controls-note">Touch: use the control dock below the board during play.</p>
       </section>
 
       <p class="closing">Clear lines to score points and level up.<br>
       The game speeds up as you climb.</p>
 
       <p class="closing">Survive as long as you can. Rack up as many points as you can.</p>
+      </div>
+
+      <div class="mobile-instructions">
+        <p class="tagline">Stack blocks. Clear lines. Build up your vex spells.</p>
+        <p class="hook">Lock two glowing <span style="color:#8B3FCF">✦</span> blocks together to earn a spell.</p>
+
+        <section>
+          <h2>TOUCH CONTROLS</h2>
+          <div class="touch-guide">
+            <div><strong>Cast</strong><br>Use your selected spell.</div>
+            <div><strong>Rotate</strong><br>Turn the falling piece.</div>
+            <div><strong>Cycle</strong><br>Select your next spell.</div>
+            <div><strong>Hard Drop</strong><br>Place the piece now.</div>
+            <div><strong>Left / Right</strong><br>Hold to move.</div>
+            <div><strong>Down</strong><br>Hold to soft drop.</div>
+          </div>
+          <p class="touch-controls-note">Pause and Mute are in the top bar during play.</p>
+        </section>
+
+        <section>
+          <h2>SPELLS</h2>
+          <p><strong>Color ◆</strong> clears one color.</p>
+          <p><strong>Shape ◈</strong> clears one shape.</p>
+          <p><strong>Shadow ◉</strong> flips the board at 40% fill.</p>
+        </section>
+      </div>
 
       <div class="prompt">PRESS ANY KEY TO BEGIN</div>
     </div>
@@ -557,6 +774,21 @@
       </div>
     </div>
   </div>
+
+  <section id="touch-dock" aria-label="Touch controls">
+    <div class="touch-row">
+      <button id="touch-cast-vex" class="touch-control" type="button" data-action="CAST_VEX" aria-label="Cast selected spell">Cast</button>
+      <button id="touch-rotate-ccw" class="touch-control" type="button" data-action="ROTATE_CCW" aria-label="Rotate counter-clockwise">Rotate CCW</button>
+      <button id="touch-cycle-vex" class="touch-control" type="button" data-action="CYCLE_VEX" aria-label="Cycle selected spell">Cycle</button>
+      <button id="touch-rotate-cw" class="touch-control" type="button" data-action="ROTATE_CW" aria-label="Rotate clockwise">Rotate CW</button>
+    </div>
+    <div class="touch-row">
+      <button id="touch-hard-drop" class="touch-control" type="button" data-action="HARD_DROP" aria-label="Hard drop">Hard Drop</button>
+      <button id="touch-left" class="touch-control touch-control-held" type="button" data-held-key="ArrowLeft" aria-label="Move left">Left</button>
+      <button id="touch-down" class="touch-control touch-control-held" type="button" data-held-key="ArrowDown" aria-label="Soft drop">Down</button>
+      <button id="touch-right" class="touch-control touch-control-held" type="button" data-held-key="ArrowRight" aria-label="Move right">Right</button>
+    </div>
+  </section>
 
   <!-- Scoreboard overlay: game-over stats + high scores -->
   <div id="scoreboard-overlay" class="hidden">
@@ -595,6 +827,14 @@
         <div class="name-slot active" id="name-slot-0"></div>
         <div class="name-slot" id="name-slot-1"></div>
         <div class="name-slot" id="name-slot-2"></div>
+      </div>
+      <div class="name-keypad" aria-label="Initials keypad">
+        <button class="name-key" type="button" data-name-key="A" aria-label="Letter A">A</button><button class="name-key" type="button" data-name-key="B" aria-label="Letter B">B</button><button class="name-key" type="button" data-name-key="C" aria-label="Letter C">C</button><button class="name-key" type="button" data-name-key="D" aria-label="Letter D">D</button><button class="name-key" type="button" data-name-key="E" aria-label="Letter E">E</button><button class="name-key" type="button" data-name-key="F" aria-label="Letter F">F</button><button class="name-key" type="button" data-name-key="G" aria-label="Letter G">G</button>
+        <button class="name-key" type="button" data-name-key="H" aria-label="Letter H">H</button><button class="name-key" type="button" data-name-key="I" aria-label="Letter I">I</button><button class="name-key" type="button" data-name-key="J" aria-label="Letter J">J</button><button class="name-key" type="button" data-name-key="K" aria-label="Letter K">K</button><button class="name-key" type="button" data-name-key="L" aria-label="Letter L">L</button><button class="name-key" type="button" data-name-key="M" aria-label="Letter M">M</button><button class="name-key" type="button" data-name-key="N" aria-label="Letter N">N</button>
+        <button class="name-key" type="button" data-name-key="O" aria-label="Letter O">O</button><button class="name-key" type="button" data-name-key="P" aria-label="Letter P">P</button><button class="name-key" type="button" data-name-key="Q" aria-label="Letter Q">Q</button><button class="name-key" type="button" data-name-key="R" aria-label="Letter R">R</button><button class="name-key" type="button" data-name-key="S" aria-label="Letter S">S</button><button class="name-key" type="button" data-name-key="T" aria-label="Letter T">T</button><button class="name-key" type="button" data-name-key="U" aria-label="Letter U">U</button>
+        <button class="name-key" type="button" data-name-key="V" aria-label="Letter V">V</button><button class="name-key" type="button" data-name-key="W" aria-label="Letter W">W</button><button class="name-key" type="button" data-name-key="X" aria-label="Letter X">X</button><button class="name-key" type="button" data-name-key="Y" aria-label="Letter Y">Y</button><button class="name-key" type="button" data-name-key="Z" aria-label="Letter Z">Z</button>
+        <button class="name-key wide" type="button" data-name-key="Backspace" aria-label="Backspace">Backspace</button>
+        <button class="name-key confirm" type="button" data-name-key="Enter" aria-label="Confirm initials">Confirm</button>
       </div>
       <p class="hint">A–Z · BACKSPACE · ENTER to confirm</p>
     </div>
