@@ -1,101 +1,118 @@
 # Vextris
 
-Vextris is a classic falling-block puzzle game with magic spells, wrapped in an arcane jewel-tone aesthetic.
+**An arcane falling-block puzzle game with earned spells, neon glyphs, and arcade high scores.**
 
-Vex glyphs ✦ appear on random blocks as they fall. Lock two marked cells beside each other to earn a spell — then cast it to clear the board or flip the game. Make the top 10 and leave your initials on the scoreboard, just like the old arcade cabinets.
+[**Play Vextris in your browser**](https://xbillwatsonx.github.io/vextris/)
 
-[Play on GitHub Pages](https://xbillwatsonx.github.io/vextris)
+<p align="center">
+  <img src="docs/release-evidence/v0.3.0-rc/desktop-gameplay.png" alt="Vextris running on desktop: board, stats, spell bank, and next-piece preview" width="760">
+</p>
 
----
+<p align="center">
+  <img src="docs/release-evidence/v0.3.0-rc/390x844.png" alt="Vextris running on a 390 by 844 touch viewport with mobile HUD and controls" width="300">
+</p>
 
-## Getting Started
+## What it is
 
-```bash
-npm install
-npm run dev
-```
+Vex glyphs ✦ appear on random falling blocks. Lock two marked cells together to earn a spell, then use it to reshape the board. Clear lines, survive rising speed, and make the local top-ten scoreboard.
 
-Open the URL Vite prints (usually `http://localhost:5173`). Press any key on the intro screen to see the instructions, then press any key again to play.
+- Canvas-rendered playfield with a dark jewel-tone arcade style
+- Deterministic game engine with seed-locked tests
+- Three Vex spells: Color, Shape, and Shadow
+- Local top-ten scores with three-letter initials
+- Keyboard play on desktop and a dedicated touch dock on phones
+- Programmatic effects and adaptive background music
 
-## Scripts
+## Play
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Start the dev server with hot reload |
-| `npm run build` | Type-check and build into `dist/` |
-| `npm test` | Run 344 tests (Vitest) |
-| `npm run preview` | Preview the production build locally |
-
-## Tech
-
-TypeScript, Vite, Vitest. Canvas-rendered on a pure black background with a spell bank side panel. localStorage-backed high score table (top 10) with retro 3-letter initials entry.
-
-## Visual Style
-
-The game uses an arcane jewel-tone palette inspired by dark magic and retro arcade cabinets:
-
-| Role | Color |
-|---|---|
-| Background | `#000000` solid black |
-| Board grid | `#2A1840` dark purple |
-| Panels / cards | `#140B24` Temple Indigo |
-| Borders / accents | `#6E2BFF` Arcane Purple |
-| Primary text | `#F3EEFF` Moon Mist |
-| Secondary text | `#D9C6FF` Soft Lavender |
-| Score / gold | `#F5B83D` Rune Gold |
-
-**Piece colors:**
-
-| Piece | Color |
-|---|---|
-| I (cyan) | `#2FE7FF` Crystal Cyan |
-| O (gold) | `#F5B83D` Rune Gold |
-| T (violet) | `#8B3FCF` Deep Purple |
-| S (green) | `#2EBD6F` Dark Jewel Green |
-| Z (red) | `#FF4FD8` Spell Pink |
-| J (blue) | `#2563EB` Cobalt Blue |
-| L (orange) | `#FF8C2A` Amber Flame |
-| Shadow | `#24113D` Deep Rune Purple |
-
-## Project Structure
-
-```
-vextris/
-├── src/
-│   ├── engine/        # Game logic: board, pieces, game loop, vex system, scores
-│   ├── render/        # Canvas renderer
-│   ├── audio/         # Sound effects via Web Audio + background music
-│   ├── config/        # Tuning constants (gravity, scoring, DAS/ARR)
-│   └── tests/         # 344 tests across 10 test files
-├── public/            # Static assets and entry point (main.ts)
-├── images/            # Artwork source files
-└── docs/              # Design doc and proposals
-```
+Open the [GitHub Pages build](https://xbillwatsonx.github.io/vextris/). On desktop, press any key through the intro and instructions. On a phone, tap through those screens and use the touch-first instructions and dock.
 
 ## Controls
 
+### Keyboard
+
 | Action | Key |
 |---|---|
-| Move left / right | ← → |
+| Move left / right | ← / → |
 | Soft drop | ↓ |
 | Hard drop | Space |
 | Rotate clockwise | ↑ |
 | Rotate counter-clockwise | Z |
-| Cycle spell | C |
-| Cast spell | V |
-| Pause | P or Esc |
-| Mute | M |
+| Cycle selected spell | C |
+| Cast selected spell | V |
+| Pause / resume | P or Esc |
+| Mute / unmute | M |
+
+### Touch
+
+| Control | What it does |
+|---|---|
+| Cast | Cast the selected spell |
+| Rotate CCW / Rotate CW | Turn the falling piece |
+| Cycle | Select the next earned spell |
+| Hard Drop | Place the falling piece immediately |
+| Left / Right | Hold to move horizontally |
+| Down | Hold to soft drop |
+| Pause / Mute | Available in the mobile HUD above the board |
+
+Touch controls are shown for coarse-pointer portrait play. Buttons use at least 48px targets, suppress text selection/callouts, support pointer and click activation, and clean up held input if the app loses focus.
 
 ## Spells
 
-- **Color Vex** ◆ — Clears every cell of one random color
-- **Shape Vex** ◈ — Clears every cell matching one random piece shape
-- **Shadow Vex** ◉ — Inverts the board (requires 40% fill)
+| Spell | Effect |
+|---|---|
+| **Color Vex** ◆ | Clears every cell of one random color. |
+| **Shape Vex** ◈ | Clears every cell matching one random piece shape. |
+| **Shadow Vex** ◉ | Inverts the board; requires at least 40% fill. |
 
-## High Scores
+## High scores and initials
 
-Top 10 scores are saved to localStorage. If your score makes the board, you'll be prompted to enter your 3-letter initials — type A-Z, backspace to correct, Enter to confirm. Non-high-scores are saved as `---`.
+Scores are stored locally in the browser. If a run reaches the top ten, enter three initials:
+
+- **Desktop:** type A–Z, Backspace to correct, Enter to save.
+- **Touch:** tap the on-screen A–Z keypad, then **Backspace** or **Confirm**.
+- Leaving all slots blank saves `AAA`.
+
+## Run locally
+
+```bash
+npm ci
+npm run dev
+```
+
+Vite prints the local URL. For a production-like local check:
+
+```bash
+npm run build
+npm run preview
+```
+
+## Verify
+
+```bash
+npm test       # full Vitest suite
+npm run lint   # strict TypeScript-aware ESLint
+npm run build  # type-check, Vite build, and music asset copy
+```
+
+`just test`, `just lint`, and `just build` provide the same project checks when `just` is installed.
+
+## Accessibility and support notes
+
+- Native semantic buttons expose accessible labels and visible keyboard focus.
+- Pause and mute controls keep their labels and `aria-pressed` state in sync.
+- Touch targets are designed for a minimum 48px height; text selection and iOS callouts are disabled on interactive controls.
+- The game requires modern browser support for Canvas, Web Audio, Pointer Events, and localStorage. Current Chrome, Edge, Firefox, and Safari are the intended support baseline. Mobile testing has been performed on a real phone and with portrait viewport emulation.
+- Background audio begins only after a player gesture, in line with browser autoplay policies.
+
+## Development notes
+
+Vextris uses TypeScript, Vite, Vitest, Canvas, and Web Audio. There are no runtime framework dependencies. The full product and technical specification is at [`docs/Vextris_PRD_and_Technical_Spec.md`](docs/Vextris_PRD_and_Technical_Spec.md).
+
+## License
+
+No license has been selected yet. See the release-candidate handoff for a recommendation before publishing one.
 
 ---
 
-*Built by [Bill Watson](https://github.com/xbillwatsonx) — first project, learning to code.*
+Built by [Bill Watson](https://github.com/xbillwatsonx).

@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible problem in Vextris
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for helping improve Vextris. Please include enough detail to reproduce the problem."
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Press/tap...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device type
+      options: [Desktop, Phone, Tablet, Other]
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshot, video, or console details

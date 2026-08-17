@@ -315,6 +315,10 @@ export function renderStats(state: GameState): void {
   const levelEl = document.getElementById('stat-level');
   const linesEl = document.getElementById('stat-lines');
   const fillEl = document.getElementById('stat-fill');
+  const mobileScoreEl = document.getElementById('mobile-score');
+  const mobileLevelEl = document.getElementById('mobile-level');
+  const mobileSelectedSpellEl = document.getElementById('mobile-selected-spell');
+  const selectedSpell = state.spellBank[state.selectedSpellIndex];
 
   if (scoreEl) scoreEl.textContent = String(state.score);
   if (levelEl) levelEl.textContent = String(state.level);
@@ -322,6 +326,11 @@ export function renderStats(state: GameState): void {
   if (fillEl) {
     const pct = Math.round(getVisibleFillPercent(state.board) * 100);
     fillEl.textContent = `${pct}%`;
+  }
+  if (mobileScoreEl) mobileScoreEl.textContent = String(state.score);
+  if (mobileLevelEl) mobileLevelEl.textContent = String(state.level);
+  if (mobileSelectedSpellEl) {
+    mobileSelectedSpellEl.textContent = selectedSpell ? (VEX_LABELS[selectedSpell.type] ?? selectedSpell.type) : 'No vex';
   }
 }
 

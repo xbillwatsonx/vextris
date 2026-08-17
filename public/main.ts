@@ -5,13 +5,20 @@
  * and renders every frame via the canvas renderer.
  */
 
-import { createGameState, startGame, moveLeft, moveRight, softDrop, hardDrop, rotateCW, rotateCCW, tick, cycleSpell, castSelectedSpell } from '../src/engine/gameLoop';
+import { createGameState, startGame, moveLeft, moveRight, softDrop, tick } from '../src/engine/gameLoop';
+import { runGameAction } from '../src/input/gameActions';
+import type { GameAction } from '../src/input/gameActions';
 import { render } from '../src/render/canvasRenderer';
 import { playSound, toggleMute, isMuted } from '../src/audio/audioManager';
 import { startMusic, updateMusic, setMusicMuted, resetMusic } from '../src/audio/musicManager';
 import { saveScore, loadScores, isHighScore } from '../src/engine/scores';
 import { SOFT_DROP_INTERVAL_MS } from '../src/config/gameConfig';
 import { getVisibleFillPercent } from '../src/engine/board';
+import { getMobileControlPresentation, shouldUseMobileGameplayPresentation } from '../src/ui/mobilePresentation';
+import { PointerHeldInputs } from '../src/input/heldInputs';
+import type { HeldKey } from '../src/input/heldInputs';
+import { createNameEntry, transitionNameEntry } from '../src/input/nameEntry';
+import { wireTouchControls } from '../src/input/touchControls';
 
 // ─── DOM References ──────────────────────────────────────────────
 
@@ -22,6 +29,8 @@ const introOverlay = document.getElementById('intro-overlay')!;
 const instructionsOverlay = document.getElementById('instructions-overlay')!;
 const scoreboardOverlay = document.getElementById('scoreboard-overlay')!;
 const nameEntryOverlay = document.getElementById('name-entry-overlay')!;
+const mobilePauseButton = document.getElementById('mobile-pause') as HTMLButtonElement;
+const mobileMuteButton = document.getElementById('mobile-mute') as HTMLButtonElement;
 
 const gameCtx = gameCanvas.getContext('2d')!;
 const nextCtx = nextCanvas.getContext('2d')!;
@@ -43,11 +52,13 @@ function advanceIntro(): void {
     introPhase = 'instructions';
     introOverlay.classList.add('hidden');
     instructionsOverlay.classList.remove('hidden');
+    updateMobileGameplayPresentation();
   } else {
     // Start game
     introPhase = 'done';
     instructionsOverlay.classList.add('hidden');
     startGame(state);
+    updateMobileGameplayPresentation();
     playSound('resume');
     // Start background music (user gesture has occurred)
     startMusic();
@@ -62,6 +73,7 @@ let savedDate = '';
 function showScoreboard(): void {
   if (scoreboardShown) return;
   scoreboardShown = true;
+  updateMobileGameplayPresentation();
 
   savedDate = new Date().toISOString();
 
@@ -119,13 +131,11 @@ function renderScoreboard(): void {
 // ─── Name Entry ─────────────────────────────────────────────────
 
 let nameEntryActive = false;
-let nameChars: string[] = ['', '', ''];
-let nameCursor = 0;
+let nameEntry = createNameEntry();
 
 function startNameEntry(): void {
   nameEntryActive = true;
-  nameChars = ['', '', ''];
-  nameCursor = 0;
+  nameEntry = createNameEntry();
   updateNameSlots();
   nameEntryOverlay.classList.remove('hidden');
 }
@@ -134,22 +144,21 @@ function updateNameSlots(): void {
   for (let i = 0; i < 3; i++) {
     const slot = document.getElementById(`name-slot-${i}`);
     if (!slot) continue;
-    slot.textContent = nameChars[i] || '';
+    slot.textContent = nameEntry.chars[i] || '';
     slot.className = 'name-slot';
-    if (i === nameCursor) slot.classList.add('active');
-    if (nameChars[i]) slot.classList.add('filled');
+    if (i === nameEntry.cursor) slot.classList.add('active');
+    if (nameEntry.chars[i]) slot.classList.add('filled');
   }
 }
 
 function handleNameKey(key: string): void {
-  if (key === 'Enter') {
-    // Confirm — use 'AAA' if all empty
-    const finalName = nameChars.every(c => c === '') ? 'AAA' : nameChars.join('');
+  const transition = transitionNameEntry(nameEntry, key);
+  nameEntry = transition.entry;
+  if (transition.confirmedName) {
     nameEntryActive = false;
     nameEntryOverlay.classList.add('hidden');
-
     saveScore({
-      name: finalName,
+      name: transition.confirmedName,
       score: state.score,
       level: state.level,
       lines: state.linesCleared,
@@ -158,26 +167,7 @@ function handleNameKey(key: string): void {
     renderScoreboard();
     return;
   }
-
-  if (key === 'Backspace') {
-    if (nameCursor > 0) {
-      nameCursor--;
-      nameChars[nameCursor] = '';
-    } else {
-      nameChars[0] = '';
-    }
-    updateNameSlots();
-    return;
-  }
-
-  // A-Z only
-  if (/^[A-Za-z]$/.test(key)) {
-    nameChars[nameCursor] = key.toUpperCase();
-    if (nameCursor < 2) {
-      nameCursor++;
-    }
-    updateNameSlots();
-  }
+  updateNameSlots();
 }
 
 function dismissScoreboard(): void {
@@ -189,7 +179,14 @@ function dismissScoreboard(): void {
 // ─── Input State ────────────────────────────────────────────────
 
 const keys = new Set<string>();
+const pointerHeldInputs = new PointerHeldInputs();
 let vKeyReleased = true; // release-based double-tap guard (§17)
+
+function runOneShotGameAction(action: GameAction): void {
+  const result = runGameAction(state, action);
+  if (result.sound) playSound(result.sound);
+  updateMobileGameplayPresentation();
+}
 
 document.addEventListener('keydown', (e) => {
   // Name entry: capture all keys
@@ -219,47 +216,34 @@ document.addEventListener('keydown', (e) => {
   switch (e.code) {
     case 'Space':
       e.preventDefault();
-      if (hardDrop(state)) playSound('hard_drop');
+      runOneShotGameAction('HARD_DROP');
       break;
     case 'KeyV': {
       e.preventDefault();
       if (!vKeyReleased) break; // must release V before another cast
       vKeyReleased = false;
-      castSelectedSpell(state);
+      runOneShotGameAction('CAST_VEX');
       break;
     }
     case 'KeyC':
-      cycleSpell(state);
+      runOneShotGameAction('CYCLE_VEX');
       break;
     case 'KeyP':
-      if (state.status === 'PLAYING') {
-        state.status = 'PAUSED';
-        playSound('pause');
-      } else if (state.status === 'PAUSED') {
-        state.status = 'PLAYING';
-        playSound('resume');
-      }
+      runOneShotGameAction('TOGGLE_PAUSE');
       break;
     case 'ArrowUp':
       e.preventDefault();
-      if (rotateCW(state)) playSound('rotate');
+      runOneShotGameAction('ROTATE_CW');
       break;
     case 'KeyZ':
       e.preventDefault();
-      if (rotateCCW(state)) playSound('rotate');
+      runOneShotGameAction('ROTATE_CCW');
       break;
     case 'Escape':
-      if (state.status === 'PLAYING') {
-        state.status = 'PAUSED';
-        playSound('pause');
-      } else if (state.status === 'PAUSED') {
-        state.status = 'PLAYING';
-        playSound('resume');
-      }
+      runOneShotGameAction('TOGGLE_PAUSE');
       break;
     case 'KeyM':
-      toggleMute();
-      setMusicMuted(isMuted());
+      toggleAudioMute();
       break;
   }
 });
@@ -275,12 +259,108 @@ document.addEventListener('keyup', (e) => {
 
 const seed = 'VEXTRIS-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 const state = createGameState(seed);
+const coarsePortraitQuery = window.matchMedia('(pointer: coarse) and (orientation: portrait)');
+
+function updateMobileGameplayPresentation(): void {
+  document.body.classList.toggle(
+    'is-mobile-gameplay',
+    shouldUseMobileGameplayPresentation(state.status, coarsePortraitQuery.matches),
+  );
+  updateMobileControlPresentation();
+}
+
+function updateMobileControlPresentation(): void {
+  const controls = getMobileControlPresentation(state.status, isMuted());
+  mobilePauseButton.textContent = controls.pause.label;
+  mobilePauseButton.setAttribute('aria-label', controls.pause.label);
+  mobilePauseButton.setAttribute('aria-pressed', String(controls.pause.pressed));
+  mobileMuteButton.textContent = controls.mute.label;
+  mobileMuteButton.setAttribute('aria-label', controls.mute.label);
+  mobileMuteButton.setAttribute('aria-pressed', String(controls.mute.pressed));
+}
+
+function toggleAudioMute(): void {
+  toggleMute();
+  setMusicMuted(isMuted());
+  updateMobileControlPresentation();
+}
+
+coarsePortraitQuery.addEventListener('change', updateMobileGameplayPresentation);
+
+function wireNameEntryKeypad(): void {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-name-key]')) {
+    const key = button.dataset.nameKey;
+    if (!key) continue;
+    let activePointer: number | null = null;
+    let suppressNextClick = false;
+    const stop = (event: PointerEvent): void => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    button.addEventListener('pointerdown', (event) => {
+      stop(event);
+      if (activePointer !== null) return;
+      activePointer = event.pointerId;
+      suppressNextClick = true;
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch {
+        // A cancelled pointer cannot be captured; pointer cleanup remains safe.
+      }
+      handleNameKey(key);
+    });
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+      button.addEventListener(eventName, (event) => {
+        stop(event);
+        if (activePointer === event.pointerId) activePointer = null;
+      });
+    }
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
+      handleNameKey(key);
+    });
+  }
+}
+
+function wireBrowserTouchControls() {
+  const actionButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-action]')]
+    .map((button) => ({ button, action: button.dataset.action }))
+    .filter((item): item is { button: HTMLButtonElement; action: GameAction | 'TOGGLE_MUTE' } =>
+      item.action !== undefined,
+    );
+  const heldButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-held-key]')]
+    .map((button) => ({ button, key: button.dataset.heldKey }))
+    .filter((item): item is { button: HTMLButtonElement; key: HeldKey } => item.key !== undefined);
+
+  return wireTouchControls({
+    actionButtons,
+    heldButtons,
+    heldInputs: pointerHeldInputs,
+    onAction: (action) => {
+      if (action === 'TOGGLE_MUTE') toggleAudioMute();
+      else runOneShotGameAction(action);
+    },
+  });
+}
+
+const browserTouchControls = wireBrowserTouchControls();
+
+window.addEventListener('blur', () => browserTouchControls.clearPressedInputs());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') browserTouchControls.clearPressedInputs();
+});
 
 function restartGame(): void {
   const newSeed = 'VEXTRIS-' + Math.random().toString(36).slice(2, 8).toUpperCase();
   const newState = createGameState(newSeed);
   Object.assign(state, newState);
   startGame(state);
+  updateMobileGameplayPresentation();
   playSound('resume');
   // Reset music for new game
   resetMusic();
@@ -308,6 +388,7 @@ function gameLoop(now: number): void {
     // Handle held keys (DAS/ARR for left/right, soft drop)
     handleHeldKeys(deltaMs);
   }
+  updateMobileGameplayPresentation();
 
   // Detect game over — show scoreboard once
   if (state.status === 'GAME_OVER' && !scoreboardShown) {
@@ -324,9 +405,9 @@ function gameLoop(now: number): void {
 }
 
 function handleHeldKeys(deltaMs: number): void {
-  const leftHeld = keys.has('ArrowLeft');
-  const rightHeld = keys.has('ArrowRight');
-  const downHeld = keys.has('ArrowDown');
+  const leftHeld = pointerHeldInputs.isHeld('ArrowLeft', keys);
+  const rightHeld = pointerHeldInputs.isHeld('ArrowRight', keys);
+  const downHeld = pointerHeldInputs.isHeld('ArrowDown', keys);
 
   // Rotation (one-shot, triggered once on press)
   // Already handled in keydown — DAS not needed for rotation
@@ -388,10 +469,20 @@ function handleHeldKeys(deltaMs: number): void {
 // Game begins in READY state. Intro screen is shown via the overlay.
 // Phase 1: artwork → any key shows instructions
 // Phase 2: instructions → any key starts the game
-introOverlay.addEventListener('click', advanceIntro);
-instructionsOverlay.addEventListener('click', advanceIntro);
+function advanceIntroFromPointer(event: PointerEvent): void {
+  event.preventDefault();
+  event.stopPropagation();
+  advanceIntro();
+}
+
+// Pointer events make the intro reliably advance on touch screens without
+// waiting for a synthesized click event.
+introOverlay.addEventListener('pointerup', advanceIntroFromPointer);
+instructionsOverlay.addEventListener('pointerup', advanceIntroFromPointer);
 scoreboardOverlay.addEventListener('click', dismissScoreboard);
+wireNameEntryKeypad();
 
 console.log(`Vextris loaded. Seed: ${state.rngSeed}`);
+updateMobileGameplayPresentation();
 lastFrame = performance.now();
 requestAnimationFrame(gameLoop);
