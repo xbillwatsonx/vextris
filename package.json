@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && cp -r public/music dist/music",
+    "check:pages-base": "node scripts/check-pages-base.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "check": "npm run lint && npm test && npm run build"
+    "check": "npm run lint && npm test && npm run build && npm run check:pages-base"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
