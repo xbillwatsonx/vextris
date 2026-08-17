@@ -35,5 +35,8 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Verify GitHub Pages asset base
+        run: npm run check:pages-base
+
       - name: Verify music assets
         run: test -d dist/music && test "$(find dist/music -type f -name '*.ogg' | wc -l)" -gt 0

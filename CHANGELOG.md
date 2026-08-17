@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-08-16
+
+### Fixed
+- Build GitHub Pages assets under the `/vextris/` project path instead of the domain root.
+- Verify the built asset base in local checks, CI, and release preflight to prevent a root-relative asset-path regression.
+
 ## [0.3.0] - 2026-08-16
 
 ### Added
@@ -32,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - Vex spell system, high-score persistence, music, and the current desktop game experience.
 
-[Unreleased]: https://github.com/xbillwatsonx/vextris/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/xbillwatsonx/vextris/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/xbillwatsonx/vextris/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/xbillwatsonx/vextris/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/xbillwatsonx/vextris/releases/tag/v0.2.0
