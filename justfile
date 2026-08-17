@@ -143,7 +143,7 @@ release-preflight:
     @test -z "$(git status --porcelain)"
     @git fetch origin master
     @test "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)"
-    @test "$(node -p 'require("package.json").version')" = "$(node -p 'require("package-lock.json").version')"
+    @node -e 'const packageVersion = require("./package.json").version; const lockVersion = require("./package-lock.json").version; if (packageVersion !== lockVersion) { console.error(`ERROR: package.json version (${packageVersion}) does not match package-lock.json version (${lockVersion}).`); process.exit(1); }'
     @npm test
     @npm run lint
     @npm run build
