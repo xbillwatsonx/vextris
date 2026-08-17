@@ -140,12 +140,12 @@ pages-payload-check: build
 # Exercise the Pages publication command without pushing a branch update
 [group('deploy')]
 deploy-dry-run: pages-payload-check
-    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' --no-push -m "deploy dry run: $(git log -1 --format='%h %s')"
+    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' --before-add ./scripts/prepare-pages-publish.cjs --no-push -m "deploy dry run: $(git log -1 --format='%h %s')"
 
 # Deploy all required runtime assets to GitHub Pages, then check the live music URLs
 [group('deploy')]
 deploy: pages-payload-check
-    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' -m "deploy: $(git log -1 --format='%h %s')"
+    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' --before-add ./scripts/prepare-pages-publish.cjs -m "deploy: $(git log -1 --format='%h %s')"
     @npm run verify:pages-music
 
 # Verify the merged release candidate without creating a tag, release, or deployment
