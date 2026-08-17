@@ -131,10 +131,22 @@ nuke:
     rm -rf dist .vite node_modules
     @echo "Run 'just install' to restore dependencies."
 
-# Deploy dist/ to GitHub Pages (requires gh token or credential manager)
+# Verify that the built Pages payload includes every runtime music track
 [group('deploy')]
-deploy: build
-    @npx -y gh-pages -d dist -m "deploy: $(git log -1 --format='%h %s')"
+pages-payload-check: build
+    @npm run check:pages-base
+    @npm run check:pages-music
+
+# Exercise the Pages publication command without pushing a branch update
+[group('deploy')]
+deploy-dry-run: pages-payload-check
+    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' --no-push -m "deploy dry run: $(git log -1 --format='%h %s')"
+
+# Deploy all required runtime assets to GitHub Pages, then check the live music URLs
+[group('deploy')]
+deploy: pages-payload-check
+    @npx -y gh-pages -d dist -s '{index.html,assets/**/*,music/**/*.ogg}' -m "deploy: $(git log -1 --format='%h %s')"
+    @npm run verify:pages-music
 
 # Verify the merged release candidate without creating a tag, release, or deployment
 [group('deploy')]
@@ -148,6 +160,7 @@ release-preflight:
     @npm run lint
     @npm run build
     @npm run check:pages-base
+    @npm run check:pages-music
     @test "$(find dist/music -maxdepth 1 -type f -name '*.ogg' | wc -l)" -eq 9
     @git diff --check "$(git describe --tags --abbrev=0 HEAD)...HEAD"
     @echo "Release preflight passed — no tag, GitHub Release, or deployment was created."
