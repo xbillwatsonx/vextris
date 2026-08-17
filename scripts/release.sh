@@ -113,6 +113,20 @@ if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
   exit 1
 fi
 
+# --current must never recreate a release that was tagged or published from
+# another checkout. Local tag existence alone cannot prove that safety.
+if [[ "$RELEASE_CURRENT" == true ]]; then
+  if git ls-remote --exit-code --tags origin "refs/tags/$TAG" "refs/tags/$TAG^{}" >/dev/null 2>&1; then
+    echo "ERROR: Tag $TAG already exists on origin."
+    exit 1
+  fi
+
+  if gh release view "$TAG" >/dev/null 2>&1; then
+    echo "ERROR: GitHub Release $TAG already exists."
+    exit 1
+  fi
+fi
+
 echo "─── Vextris Release ───"
 echo "  Current: v${CURRENT_VERSION}"
 echo "  New:     v${NEW_VERSION}"

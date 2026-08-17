@@ -148,5 +148,5 @@ release-preflight:
     @npm run lint
     @npm run build
     @test "$(find dist/music -maxdepth 1 -type f -name '*.ogg' | wc -l)" -eq 9
-    @git diff --check
+    @git diff --check v0.2.0...HEAD
     @echo "Release preflight passed — no tag, GitHub Release, or deployment was created."
