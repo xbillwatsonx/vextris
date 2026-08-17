@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.3.1] - Pending release approval
+## [0.3.1] - 2026-08-16
 
 ### Fixed
 - Build GitHub Pages assets under the `/vextris/` project path instead of the domain root.
