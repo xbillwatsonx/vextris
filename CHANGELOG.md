@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Release-candidate documentation, GitHub contribution templates, and CI workflow are prepared locally pending review.
 
-## [0.3.0] - Pending release approval
+## [0.3.0] - 2026-08-16
 
 ### Added
 - Touch-first portrait gameplay with a compact mobile HUD and two-row control dock.
